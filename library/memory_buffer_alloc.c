@@ -511,7 +511,9 @@ void memory_buffer_alloc_status()
                       heap.malloc_count, heap.free_count );
 
     if( heap.first->next == NULL )
+    {
         polarssl_fprintf( stderr, "All memory de-allocated in stack buffer\n" );
+    }
     else
     {
         polarssl_fprintf( stderr, "Memory currently allocated:\n" );

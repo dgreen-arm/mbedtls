@@ -14,6 +14,7 @@ Bugfix
    * Fix leap year calculation in x509_date_is_valid() to ensure that invalid
      dates on leap years with 100 and 400 intervals are handled correctly. Found
      by Nicholas Wilson. #694
+   * Fix braces in memory_buffer_alloc_status(). Found by sbranden, #552.
 
 = mbed TLS 1.3.21 branch released 2017-08-10
 

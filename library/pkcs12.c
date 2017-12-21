@@ -179,7 +179,8 @@ int mbedtls_pkcs12_pbe( mbedtls_asn1_buf *pbe_params, int mode,
                 const unsigned char *data, size_t len,
                 unsigned char *output )
 {
-    int ret, keylen = 0;
+    int ret;
+    size_t keylen = 0;
     unsigned char key[32];
     unsigned char iv[16];
     const mbedtls_cipher_info_t *cipher_info;
@@ -204,7 +205,7 @@ int mbedtls_pkcs12_pbe( mbedtls_asn1_buf *pbe_params, int mode,
     if( ( ret = mbedtls_cipher_setup( &cipher_ctx, cipher_info ) ) != 0 )
         goto exit;
 
-    if( ( ret = mbedtls_cipher_setkey( &cipher_ctx, key, 8 * keylen, (mbedtls_operation_t) mode ) ) != 0 )
+    if( ( ret = mbedtls_cipher_setkey( &cipher_ctx, key, 8 * (int) keylen, (mbedtls_operation_t) mode ) ) != 0 )
         goto exit;
 
     if( ( ret = mbedtls_cipher_set_iv( &cipher_ctx, iv, cipher_info->iv_size ) ) != 0 )
@@ -334,7 +335,7 @@ int mbedtls_pkcs12_derivation( unsigned char *data, size_t datalen,
         c = 0;
         for( i = v; i > 0; i-- )
         {
-            j = salt_block[i - 1] + hash_block[i - 1] + c;
+            j = (unsigned int) ( salt_block[i - 1] + hash_block[i - 1] + c );
             c = (unsigned char) (j >> 8);
             salt_block[i - 1] = j & 0xFF;
         }
@@ -343,7 +344,7 @@ int mbedtls_pkcs12_derivation( unsigned char *data, size_t datalen,
         c = 0;
         for( i = v; i > 0; i-- )
         {
-            j = pwd_block[i - 1] + hash_block[i - 1] + c;
+            j = (unsigned int) ( pwd_block[i - 1] + hash_block[i - 1] + c );
             c = (unsigned char) (j >> 8);
             pwd_block[i - 1] = j & 0xFF;
         }

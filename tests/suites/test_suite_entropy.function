@@ -27,7 +27,7 @@ static int entropy_dummy_source( void *data, unsigned char *output,
         if( *d < 0 )
             return( MBEDTLS_ERR_ENTROPY_SOURCE_FAILED );
         else
-            *olen = *d;
+            *olen = (size_t) *d;
     }
 
     memset( output, 0x2a, *olen );
@@ -164,12 +164,12 @@ exit:
 /* END_CASE */
 
 /* BEGIN_CASE */
-void entropy_func_len( int len, int ret )
+void entropy_func_len( int len_, int ret )
 {
     mbedtls_entropy_context ctx;
     unsigned char buf[MBEDTLS_ENTROPY_BLOCK_SIZE + 10] = { 0 };
     unsigned char acc[MBEDTLS_ENTROPY_BLOCK_SIZE + 10] = { 0 };
-    size_t i, j;
+    size_t i, j, len = (size_t) len_;
 
     mbedtls_entropy_init( &ctx );
 
@@ -184,7 +184,7 @@ void entropy_func_len( int len, int ret )
     }
 
     if( ret == 0 )
-        for( j = 0; j < (size_t) len; j++ )
+        for( j = 0; j < len; j++ )
             TEST_ASSERT( acc[j] != 0 );
 
     for( j = len; j < sizeof( buf ); j++ )
@@ -234,7 +234,7 @@ void entropy_threshold( int threshold, int chunk_size, int result )
     mbedtls_entropy_init( &ctx );
 
     TEST_ASSERT( mbedtls_entropy_add_source( &ctx, entropy_dummy_source,
-                                     &chunk_size, threshold,
+                                     &chunk_size, (size_t) threshold,
                                      MBEDTLS_ENTROPY_SOURCE_WEAK ) == 0 );
 
     entropy_dummy_calls = 0;

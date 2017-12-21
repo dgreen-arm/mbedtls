@@ -155,10 +155,10 @@ static void close_output( FILE* out_stream )
 }
 #endif /* __unix__ || __APPLE__ __MACH__ */
 
-static int unhexify( unsigned char *obuf, const char *ibuf )
+static unsigned int unhexify( unsigned char *obuf, const char *ibuf )
 {
-    unsigned char c, c2;
-    int len = strlen( ibuf ) / 2;
+    int c, c2;
+    unsigned int len = (unsigned int) strlen( ibuf ) / 2;
     assert( strlen( ibuf ) % 2 == 0 ); /* must be even number of bytes */
 
     while( *ibuf != 0 )
@@ -183,13 +183,13 @@ static int unhexify( unsigned char *obuf, const char *ibuf )
         else
             assert( 0 );
 
-        *obuf++ = ( c << 4 ) | c2;
+        *obuf++ = (unsigned char) ( ( c << 4 ) | c2 );
     }
 
     return len;
 }
 
-static void hexify( unsigned char *obuf, const unsigned char *ibuf, int len )
+static void hexify( unsigned char *obuf, const unsigned char *ibuf, unsigned int len )
 {
     unsigned char l, h;
 
@@ -199,14 +199,14 @@ static void hexify( unsigned char *obuf, const unsigned char *ibuf, int len )
         l = *ibuf % 16;
 
         if( h < 10 )
-            *obuf++ = '0' + h;
+            *obuf++ = (unsigned char) ( '0' + h );
         else
-            *obuf++ = 'a' + h - 10;
+            *obuf++ = (unsigned char) ( 'a' + h - 10 );
 
         if( l < 10 )
-            *obuf++ = '0' + l;
+            *obuf++ = (unsigned char) ( '0' + l );
         else
-            *obuf++ = 'a' + l - 10;
+            *obuf++ = (unsigned char) ( 'a' + l - 10 );
 
         ++ibuf;
         len--;
@@ -278,7 +278,7 @@ static int rnd_std_rand( void *rng_state, unsigned char *output, size_t len )
         rng_state  = NULL;
 
     for( i = 0; i < len; ++i )
-        output[i] = rand();
+        output[i] = (unsigned char) rand();
 #else
     if( rng_state != NULL )
         rng_state = NULL;

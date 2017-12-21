@@ -97,7 +97,7 @@ static int ssl_parse_servername_ext( mbedtls_ssl_context *ssl,
 
     MBEDTLS_SSL_DEBUG_MSG( 3, ( "parse ServerName extension" ) );
 
-    servername_list_size = ( ( buf[0] << 8 ) | ( buf[1] ) );
+    servername_list_size = (size_t) ( ( buf[0] << 8 ) | ( buf[1] ) );
     if( servername_list_size + 2 != len )
     {
         MBEDTLS_SSL_DEBUG_MSG( 1, ( "bad client hello message" ) );
@@ -109,7 +109,7 @@ static int ssl_parse_servername_ext( mbedtls_ssl_context *ssl,
     p = buf + 2;
     while( servername_list_size > 0 )
     {
-        hostname_len = ( ( p[1] << 8 ) | p[2] );
+        hostname_len = (size_t) ( ( p[1] << 8 ) | p[2] );
         if( hostname_len + 3 > servername_list_size )
         {
             MBEDTLS_SSL_DEBUG_MSG( 1, ( "bad client hello message" ) );
@@ -211,7 +211,7 @@ static int ssl_parse_signature_algorithms_ext( mbedtls_ssl_context *ssl,
     mbedtls_md_type_t md_cur;
     mbedtls_pk_type_t sig_cur;
 
-    sig_alg_list_size = ( ( buf[0] << 8 ) | ( buf[1] ) );
+    sig_alg_list_size = (size_t) ( ( buf[0] << 8 ) | ( buf[1] ) );
     if( sig_alg_list_size + 2 != len ||
         sig_alg_list_size % 2 != 0 )
     {
@@ -279,7 +279,7 @@ static int ssl_parse_supported_elliptic_curves( mbedtls_ssl_context *ssl,
     const unsigned char *p;
     const mbedtls_ecp_curve_info *curve_info, **curves;
 
-    list_size = ( ( buf[0] << 8 ) | ( buf[1] ) );
+    list_size = (size_t) ( ( buf[0] << 8 ) | ( buf[1] ) );
     if( list_size + 2 != len ||
         list_size % 2 != 0 )
     {
@@ -316,7 +316,7 @@ static int ssl_parse_supported_elliptic_curves( mbedtls_ssl_context *ssl,
     p = buf + 2;
     while( list_size > 0 && our_size > 1 )
     {
-        curve_info = mbedtls_ecp_curve_info_from_tls_id( ( p[0] << 8 ) | p[1] );
+        curve_info = mbedtls_ecp_curve_info_from_tls_id( (uint16_t) ( ( p[0] << 8 ) | p[1] ) );
 
         if( curve_info != NULL )
         {
@@ -594,7 +594,7 @@ static int ssl_parse_alpn_ext( mbedtls_ssl_context *ssl,
         return( MBEDTLS_ERR_SSL_BAD_HS_CLIENT_HELLO );
     }
 
-    list_len = ( buf[0] << 8 ) | buf[1];
+    list_len = (size_t) ( ( buf[0] << 8 ) | buf[1] );
     if( list_len != len - 2 )
     {
         mbedtls_ssl_send_alert_message( ssl, MBEDTLS_SSL_ALERT_LEVEL_FATAL,
@@ -1290,7 +1290,7 @@ read_record_header:
     }
 #endif /* MBEDTLS_SSL_PROTO_DTLS */
 
-    msg_len = ( ssl->in_len[0] << 8 ) | ssl->in_len[1];
+    msg_len = (size_t) ( ( ssl->in_len[0] << 8 ) | ssl->in_len[1] );
 
 #if defined(MBEDTLS_SSL_RENEGOTIATION)
     if( ssl->renego_status != MBEDTLS_SSL_INITIAL_HANDSHAKE )
@@ -1356,7 +1356,7 @@ read_record_header:
 
     /* We don't support fragmentation of ClientHello (yet?) */
     if( buf[1] != 0 ||
-        msg_len != mbedtls_ssl_hs_hdr_len( ssl ) + ( ( buf[2] << 8 ) | buf[3] ) )
+        msg_len != mbedtls_ssl_hs_hdr_len( ssl ) + (size_t) ( ( buf[2] << 8 ) | buf[3] ) )
     {
         MBEDTLS_SSL_DEBUG_MSG( 1, ( "bad client hello message" ) );
         return( MBEDTLS_ERR_SSL_BAD_HS_CLIENT_HELLO );
@@ -1373,8 +1373,8 @@ read_record_header:
         if( ssl->renego_status == MBEDTLS_SSL_RENEGOTIATION_IN_PROGRESS )
         {
             /* This couldn't be done in ssl_prepare_handshake_record() */
-            unsigned int cli_msg_seq = ( ssl->in_msg[4] << 8 ) |
-                                         ssl->in_msg[5];
+            unsigned int cli_msg_seq = (unsigned int) ( ( ssl->in_msg[4] << 8 ) |
+                                                          ssl->in_msg[5] );
 
             if( cli_msg_seq != ssl->handshake->in_msg_seq )
             {
@@ -1389,8 +1389,8 @@ read_record_header:
         else
 #endif
         {
-            unsigned int cli_msg_seq = ( ssl->in_msg[4] << 8 ) |
-                                         ssl->in_msg[5];
+            unsigned int cli_msg_seq = (unsigned int) ( ( ssl->in_msg[4] << 8 ) |
+                                                          ssl->in_msg[5] );
             ssl->handshake->out_msg_seq = cli_msg_seq;
             ssl->handshake->in_msg_seq  = cli_msg_seq + 1;
         }
@@ -1561,8 +1561,8 @@ read_record_header:
 #endif /* MBEDTLS_SSL_PROTO_DTLS */
         ciph_offset = 35 + sess_len;
 
-    ciph_len = ( buf[ciph_offset + 0] << 8 )
-             | ( buf[ciph_offset + 1]      );
+    ciph_len = (size_t) ( ( buf[ciph_offset + 0] << 8 )
+                        | ( buf[ciph_offset + 1]      ) );
 
     if( ciph_len < 2 ||
         ciph_len + 2 + ciph_offset + 1 > msg_len || /* 1 for comp. alg. len */
@@ -1634,8 +1634,8 @@ read_record_header:
                 return( MBEDTLS_ERR_SSL_BAD_HS_CLIENT_HELLO );
             }
 
-            ext_len = ( buf[ext_offset + 0] << 8 )
-                    | ( buf[ext_offset + 1]      );
+            ext_len = (size_t) ( ( buf[ext_offset + 0] << 8 )
+                               | ( buf[ext_offset + 1]      ) );
 
             if( ( ext_len > 0 && ext_len < 4 ) ||
                 msg_len != ext_offset + 2 + ext_len )
@@ -1654,10 +1654,10 @@ read_record_header:
 
         while( ext_len != 0 )
         {
-            unsigned int ext_id   = ( ( ext[0] <<  8 )
-                                    | ( ext[1]       ) );
-            unsigned int ext_size = ( ( ext[2] <<  8 )
-                                    | ( ext[3]       ) );
+            unsigned int ext_id   = (unsigned int) ( ( ext[0] <<  8 )
+                                                   | ( ext[1]       ) );
+            unsigned int ext_size = (unsigned int) ( ( ext[2] <<  8 )
+                                                   | ( ext[3]       ) );
 
             if( ext_size + 4 > ext_len )
             {
@@ -2165,7 +2165,7 @@ static void ssl_write_renegotiation_ext( mbedtls_ssl_context *ssl,
         *p++ = 0x00;
     }
 
-    *olen = p - buf;
+    *olen = (size_t) ( p - buf );
 }
 
 #if defined(MBEDTLS_SSL_MAX_FRAGMENT_LENGTH)
@@ -2351,7 +2351,7 @@ static int ssl_write_hello_verify_request( mbedtls_ssl_context *ssl )
 
     MBEDTLS_SSL_DEBUG_BUF( 3, "cookie sent", cookie_len_byte + 1, *cookie_len_byte );
 
-    ssl->out_msglen  = p - ssl->out_msg;
+    ssl->out_msglen  = (size_t) ( p - ssl->out_msg );
     ssl->out_msgtype = MBEDTLS_SSL_MSG_HANDSHAKE;
     ssl->out_msg[0]  = MBEDTLS_SSL_HS_HELLO_VERIFY_REQUEST;
 
@@ -2589,7 +2589,7 @@ static int ssl_write_server_hello( mbedtls_ssl_context *ssl )
     }
 #endif
 
-    ssl->out_msglen  = p - buf;
+    ssl->out_msglen  = (size_t) ( p - buf );
     ssl->out_msgtype = MBEDTLS_SSL_MSG_HANDSHAKE;
     ssl->out_msg[0]  = MBEDTLS_SSL_HS_SERVER_HELLO;
 
@@ -2782,7 +2782,7 @@ static int ssl_write_certificate_request( mbedtls_ssl_context *ssl )
         }
     }
 
-    ssl->out_msglen  = p - buf;
+    ssl->out_msglen  = (size_t) ( p - buf );
     ssl->out_msgtype = MBEDTLS_SSL_MSG_HANDSHAKE;
     ssl->out_msg[0]  = MBEDTLS_SSL_HS_CERTIFICATE_REQUEST;
     ssl->out_msg[4 + ct_len + sa_len] = (unsigned char)( total_dn_size  >> 8 );
@@ -3289,7 +3289,7 @@ static int ssl_parse_client_dh_public( mbedtls_ssl_context *ssl, unsigned char *
         return( MBEDTLS_ERR_SSL_BAD_HS_CLIENT_KEY_EXCHANGE );
     }
 
-    n = ( (*p)[0] << 8 ) | (*p)[1];
+    n = (size_t) ( ( (*p)[0] << 8 ) | (*p)[1] );
     *p += 2;
 
     if( *p + n > end )
@@ -3378,7 +3378,7 @@ static int ssl_parse_encrypted_pms( mbedtls_ssl_context *ssl,
                       ssl->conf->f_rng, ssl->conf->p_rng );
 
     diff  = (unsigned int) ret;
-    diff |= peer_pmslen ^ 48;
+    diff |= (unsigned int) ( peer_pmslen ^ 48 );
     diff |= peer_pms[0] ^ ver[0];
     diff |= peer_pms[1] ^ ver[1];
 
@@ -3402,13 +3402,13 @@ static int ssl_parse_encrypted_pms( mbedtls_ssl_context *ssl,
 #pragma warning( push )
 #pragma warning( disable : 4146 )
 #endif
-    mask = - ( ( diff | - diff ) >> ( sizeof( unsigned int ) * 8 - 1 ) );
+    mask = (unsigned char) - ( ( diff | - diff ) >> ( sizeof( unsigned int ) * 8 - 1 ) );
 #if defined(_MSC_VER)
 #pragma warning( pop )
 #endif
 
     for( i = 0; i < ssl->handshake->pmslen; i++ )
-        pms[i] = ( mask & fake_pms[i] ) | ( (~mask) & peer_pms[i] );
+        pms[i] = (unsigned char) ( ( mask & fake_pms[i] ) | ( (~mask) & peer_pms[i] ) );
 
     return( 0 );
 }
@@ -3439,7 +3439,7 @@ static int ssl_parse_client_psk_identity( mbedtls_ssl_context *ssl, unsigned cha
         return( MBEDTLS_ERR_SSL_BAD_HS_CLIENT_KEY_EXCHANGE );
     }
 
-    n = ( (*p)[0] << 8 ) | (*p)[1];
+    n = (size_t) ( ( (*p)[0] << 8 ) | (*p)[1] );
     *p += 2;
 
     if( n < 1 || n > 65535 || *p + n > end )
@@ -3548,7 +3548,7 @@ static int ssl_parse_client_key_exchange( mbedtls_ssl_context *ssl )
         ciphersuite_info->key_exchange == MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA )
     {
         if( ( ret = mbedtls_ecdh_read_public( &ssl->handshake->ecdh_ctx,
-                                      p, end - p) ) != 0 )
+                                      p, (size_t) ( end - p ) ) ) != 0 )
         {
             MBEDTLS_SSL_DEBUG_RET( 1, "mbedtls_ecdh_read_public", ret );
             return( MBEDTLS_ERR_SSL_BAD_HS_CLIENT_KEY_EXCHANGE_RP );
@@ -3660,7 +3660,7 @@ static int ssl_parse_client_key_exchange( mbedtls_ssl_context *ssl )
         }
 
         if( ( ret = mbedtls_ecdh_read_public( &ssl->handshake->ecdh_ctx,
-                                       p, end - p ) ) != 0 )
+                                       p, (size_t) ( end - p ) ) ) != 0 )
         {
             MBEDTLS_SSL_DEBUG_RET( 1, "mbedtls_ecdh_read_public", ret );
             return( MBEDTLS_ERR_SSL_BAD_HS_CLIENT_KEY_EXCHANGE_RP );
@@ -3906,7 +3906,7 @@ static int ssl_parse_certificate_verify( mbedtls_ssl_context *ssl )
         return( MBEDTLS_ERR_SSL_BAD_HS_CERTIFICATE_VERIFY );
     }
 
-    sig_len = ( ssl->in_msg[i] << 8 ) | ssl->in_msg[i+1];
+    sig_len = (size_t) ( ( ssl->in_msg[i] << 8 ) | ssl->in_msg[i+1] );
     i += 2;
 
     if( i + sig_len != ssl->in_hslen )
@@ -3972,7 +3972,7 @@ static int ssl_write_new_session_ticket( mbedtls_ssl_context *ssl )
         tlen = 0;
     }
 
-    ssl->out_msg[4] = ( lifetime >> 24 ) & 0xFF;
+    ssl->out_msg[4] = (unsigned char) ( ( lifetime >> 24 ) & 0xFF );
     ssl->out_msg[5] = ( lifetime >> 16 ) & 0xFF;
     ssl->out_msg[6] = ( lifetime >>  8 ) & 0xFF;
     ssl->out_msg[7] = ( lifetime       ) & 0xFF;

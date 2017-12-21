@@ -1226,7 +1226,7 @@ static const unsigned char aes_test_ctr_ct[3][48] =
       0x25, 0xB2, 0x07, 0x2F }
 };
 
-static const int aes_test_ctr_len[3] =
+static const size_t aes_test_ctr_len[3] =
     { 16, 32, 36 };
 #endif /* MBEDTLS_CIPHER_MODE_CTR */
 
@@ -1235,7 +1235,8 @@ static const int aes_test_ctr_len[3] =
  */
 int mbedtls_aes_self_test( int verbose )
 {
-    int ret = 0, i, j, u, v;
+    int ret = 0, j, v;
+    unsigned int i, u;
     unsigned char key[32];
     unsigned char buf[64];
 #if defined(MBEDTLS_CIPHER_MODE_CBC) || defined(MBEDTLS_CIPHER_MODE_CFB)
@@ -1248,7 +1249,7 @@ int mbedtls_aes_self_test( int verbose )
     size_t offset;
 #endif
 #if defined(MBEDTLS_CIPHER_MODE_CTR)
-    int len;
+    size_t len;
     unsigned char nonce_counter[16];
     unsigned char stream_block[16];
 #endif

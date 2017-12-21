@@ -73,7 +73,7 @@ int mbedtls_ccm_setkey( mbedtls_ccm_context *ctx,
     int ret;
     const mbedtls_cipher_info_t *cipher_info;
 
-    cipher_info = mbedtls_cipher_info_from_values( cipher, keybits, MBEDTLS_MODE_ECB );
+    cipher_info = mbedtls_cipher_info_from_values( cipher, (int) keybits, MBEDTLS_MODE_ECB );
     if( cipher_info == NULL )
         return( MBEDTLS_ERR_CCM_BAD_INPUT );
 
@@ -85,7 +85,7 @@ int mbedtls_ccm_setkey( mbedtls_ccm_context *ctx,
     if( ( ret = mbedtls_cipher_setup( &ctx->cipher_ctx, cipher_info ) ) != 0 )
         return( ret );
 
-    if( ( ret = mbedtls_cipher_setkey( &ctx->cipher_ctx, key, keybits,
+    if( ( ret = mbedtls_cipher_setkey( &ctx->cipher_ctx, key, (int) keybits,
                                MBEDTLS_ENCRYPT ) ) != 0 )
     {
         return( ret );
@@ -165,7 +165,7 @@ static int ccm_auth_crypt( mbedtls_ccm_context *ctx, int mode, size_t length,
     if( add_len > 0xFF00 )
         return( MBEDTLS_ERR_CCM_BAD_INPUT );
 
-    q = 16 - 1 - (unsigned char) iv_len;
+    q = (unsigned char) ( 16 - 1 - iv_len );
 
     /*
      * First block B_0:
@@ -180,9 +180,9 @@ static int ccm_auth_crypt( mbedtls_ccm_context *ctx, int mode, size_t length,
      * 2 .. 0   q - 1
      */
     b[0] = 0;
-    b[0] |= ( add_len > 0 ) << 6;
-    b[0] |= ( ( tag_len - 2 ) / 2 ) << 3;
-    b[0] |= q - 1;
+    b[0] = (unsigned char) ( b[0] | ( ( add_len > 0 ) << 6 ) );
+    b[0] |= (unsigned char) ( ( ( tag_len - 2 ) / 2 ) << 3 );
+    b[0] |= (unsigned char) ( q - 1 );
 
     memcpy( b + 1, iv, iv_len );
 
@@ -241,7 +241,7 @@ static int ccm_auth_crypt( mbedtls_ccm_context *ctx, int mode, size_t length,
      * 7 .. 3   0
      * 2 .. 0   q - 1
      */
-    ctr[0] = q - 1;
+    ctr[0] = (unsigned char) ( q - 1 );
     memcpy( ctr + 1, iv, iv_len );
     memset( ctr + 1 + iv_len, 0, q );
     ctr[15] = 1;

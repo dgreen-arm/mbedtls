@@ -6,7 +6,7 @@ int mbedtls_entropy_func( void *data, unsigned char *buf, size_t len )
 {
     const unsigned char *p = (unsigned char *) data;
     memcpy( buf, p + test_offset_idx, len );
-    test_offset_idx += len;
+    test_offset_idx += (int) len;
     return( 0 );
 }
 /* END_HEADER */
@@ -40,7 +40,7 @@ void ctr_drbg_special_behaviours( )
                         MBEDTLS_CTR_DRBG_MAX_SEED_INPUT + 1 ) ==
                         MBEDTLS_ERR_CTR_DRBG_INPUT_TOO_BIG );
 
-    mbedtls_ctr_drbg_set_entropy_len( &ctx, ~0 );
+    mbedtls_ctr_drbg_set_entropy_len( &ctx, (size_t) ~0 );
     TEST_ASSERT( mbedtls_ctr_drbg_reseed( &ctx, additional,
                         MBEDTLS_CTR_DRBG_MAX_SEED_INPUT ) ==
                         MBEDTLS_ERR_CTR_DRBG_INPUT_TOO_BIG );
@@ -61,7 +61,7 @@ void ctr_drbg_validate_pr( char *add_init_string, char *entropy_string,
     mbedtls_ctr_drbg_context ctx;
     unsigned char buf[512];
     unsigned char output_str[512];
-    int add_init_len, add1_len, add2_len;
+    unsigned int add_init_len, add1_len, add2_len;
 
     mbedtls_ctr_drbg_init( &ctx );
     memset( output_str, 0, 512 );
@@ -98,7 +98,7 @@ void ctr_drbg_validate_nopr( char *add_init_string, char *entropy_string,
     mbedtls_ctr_drbg_context ctx;
     unsigned char buf[512];
     unsigned char output_str[512];
-    int add_init_len, add1_len, add_reseed_len, add2_len;
+    unsigned int add_init_len, add1_len, add_reseed_len, add2_len;
 
     mbedtls_ctr_drbg_init( &ctx );
     memset( output_str, 0, 512 );
@@ -130,8 +130,7 @@ void ctr_drbg_entropy_usage( )
     unsigned char add[16];
     unsigned char entropy[1024];
     mbedtls_ctr_drbg_context ctx;
-    size_t i, reps = 10;
-    int last_idx;
+    int i, last_idx, reps = 10;
 
     mbedtls_ctr_drbg_init( &ctx );
     test_offset_idx = 0;

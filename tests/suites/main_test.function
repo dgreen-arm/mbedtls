@@ -52,9 +52,9 @@ int verify_int( char *str, int *value )
     if( digits )
     {
         if( hex )
-            *value = strtol( str, NULL, 16 );
+            *value = (int) strtol( str, NULL, 16 );
         else
-            *value = strtol( str, NULL, 10 );
+            *value = (int) strtol( str, NULL, 10 );
 
         return( 0 );
     }
@@ -150,7 +150,7 @@ int get_line( FILE *f, char *buf, size_t len )
 
     do
     {
-        ret = fgets( buf, len, f );
+        ret = fgets( buf, (int) len, f );
         if( ret == NULL )
             return( -1 );
     }
@@ -374,7 +374,7 @@ int main(int argc, const char *argv[])
                 break;
             mbedtls_fprintf( stdout, "%s%.66s", test_info.failed ? "\n" : "", buf );
             mbedtls_fprintf( stdout, " " );
-            for( i = strlen( buf ) + 1; i < 67; i++ )
+            for( i = (int) ( strlen( buf ) + 1 ); i < 67; i++ )
                 mbedtls_fprintf( stdout, "." );
             mbedtls_fprintf( stdout, " " );
             fflush( stdout );

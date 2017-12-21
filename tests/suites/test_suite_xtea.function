@@ -68,7 +68,7 @@ void xtea_encrypt_cbc( char *hex_key_string, char *hex_iv_string,
     unsigned char dst_str[100];
     unsigned char iv_str[100];
     unsigned char output[100];
-    size_t len;
+    unsigned int len;
     mbedtls_xtea_context ctx;
 
     memset(key_str, 0x00, 100);
@@ -99,7 +99,7 @@ void xtea_decrypt_cbc( char *hex_key_string, char *hex_iv_string,
     unsigned char dst_str[100];
     unsigned char iv_str[100];
     unsigned char output[100];
-    size_t len;
+    unsigned int len;
     mbedtls_xtea_context ctx;
 
     memset(key_str, 0x00, 100);

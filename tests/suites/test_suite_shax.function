@@ -10,7 +10,7 @@ void mbedtls_sha1( char *hex_src_string, char *hex_hash_string )
     unsigned char src_str[10000];
     unsigned char hash_str[10000];
     unsigned char output[41];
-    int src_len;
+    unsigned int src_len;
 
     memset(src_str, 0x00, 10000);
     memset(hash_str, 0x00, 10000);
@@ -31,7 +31,7 @@ void sha224(char *hex_src_string, char *hex_hash_string )
     unsigned char src_str[10000];
     unsigned char hash_str[10000];
     unsigned char output[57];
-    int src_len;
+    unsigned int src_len;
 
     memset(src_str, 0x00, 10000);
     memset(hash_str, 0x00, 10000);
@@ -52,7 +52,7 @@ void mbedtls_sha256(char *hex_src_string, char *hex_hash_string )
     unsigned char src_str[10000];
     unsigned char hash_str[10000];
     unsigned char output[65];
-    int src_len;
+    unsigned int src_len;
 
     memset(src_str, 0x00, 10000);
     memset(hash_str, 0x00, 10000);
@@ -73,7 +73,7 @@ void sha384(char *hex_src_string, char *hex_hash_string )
     unsigned char src_str[10000];
     unsigned char hash_str[10000];
     unsigned char output[97];
-    int src_len;
+    unsigned int src_len;
 
     memset(src_str, 0x00, 10000);
     memset(hash_str, 0x00, 10000);
@@ -94,7 +94,7 @@ void mbedtls_sha512(char *hex_src_string, char *hex_hash_string )
     unsigned char src_str[10000];
     unsigned char hash_str[10000];
     unsigned char output[129];
-    int src_len;
+    unsigned int src_len;
 
     memset(src_str, 0x00, 10000);
     memset(hash_str, 0x00, 10000);

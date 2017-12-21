@@ -384,7 +384,7 @@ static const unsigned char sha512_test_buf[3][113] =
     { "" }
 };
 
-static const int sha512_test_buflen[3] =
+static const size_t sha512_test_buflen[3] =
 {
     3, 112, 1000
 };
@@ -447,7 +447,8 @@ static const unsigned char sha512_test_sum[6][64] =
  */
 int mbedtls_sha512_self_test( int verbose )
 {
-    int i, j, k, buflen, ret = 0;
+    int i, j, k, ret = 0;
+    size_t buflen;
     unsigned char *buf;
     unsigned char sha512sum[64];
     mbedtls_sha512_context ctx;
@@ -486,7 +487,7 @@ int mbedtls_sha512_self_test( int verbose )
 
         mbedtls_sha512_finish( &ctx, sha512sum );
 
-        if( memcmp( sha512sum, sha512_test_sum[i], 64 - k * 16 ) != 0 )
+        if( memcmp( sha512sum, sha512_test_sum[i], (size_t) ( 64 - k * 16 ) ) != 0 )
         {
             if( verbose != 0 )
                 mbedtls_printf( "failed\n" );

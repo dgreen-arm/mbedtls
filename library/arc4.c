@@ -82,7 +82,8 @@ void mbedtls_arc4_setup( mbedtls_arc4_context *ctx, const unsigned char *key,
     for( i = 0; i < 256; i++ )
         m[i] = (unsigned char) i;
 
-    j = k = 0;
+    j = 0;
+    k = 0;
 
     for( i = 0; i < 256; i++, k++ )
     {

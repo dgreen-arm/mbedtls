@@ -224,7 +224,7 @@ int mbedtls_x509write_crt_set_key_usage( mbedtls_x509write_cert *ctx,
     int ret;
 
     /* We currently only support 7 bits, from 0x80 to 0x02 */
-    if( ( key_usage & ~0xfe ) != 0 )
+    if( ( key_usage & (unsigned int) ~0xfe ) != 0 )
         return( MBEDTLS_ERR_X509_FEATURE_UNAVAILABLE );
 
     c = buf + 4;
@@ -338,7 +338,7 @@ int mbedtls_x509write_crt_der( mbedtls_x509write_cert *ctx, unsigned char *buf, 
      *  SubjectPublicKeyInfo
      */
     MBEDTLS_ASN1_CHK_ADD( pub_len, mbedtls_pk_write_pubkey_der( ctx->subject_key,
-                                                tmp_buf, c - tmp_buf ) );
+                                                tmp_buf, (size_t) ( c - tmp_buf ) ) );
     c -= pub_len;
     len += pub_len;
 
@@ -447,7 +447,7 @@ int mbedtls_x509write_crt_pem( mbedtls_x509write_cert *crt, unsigned char *buf, 
 
     if( ( ret = mbedtls_pem_write_buffer( PEM_BEGIN_CRT, PEM_END_CRT,
                                   output_buf + sizeof(output_buf) - ret,
-                                  ret, buf, size, &olen ) ) != 0 )
+                                  (size_t) ret, buf, size, &olen ) ) != 0 )
     {
         return( ret );
     }

@@ -157,7 +157,7 @@ int mbedtls_x509_csr_parse_der( mbedtls_x509_csr *csr,
     }
 
     end = p + len;
-    csr->cri.len = end - csr->cri.p;
+    csr->cri.len = (size_t) ( end - csr->cri.p );
 
     /*
      *  Version  ::=  INTEGER {  v1(0) }
@@ -194,7 +194,7 @@ int mbedtls_x509_csr_parse_der( mbedtls_x509_csr *csr,
         return( ret );
     }
 
-    csr->subject_raw.len = p - csr->subject_raw.p;
+    csr->subject_raw.len = (size_t) ( p - csr->subject_raw.p );
 
     /*
      *  subjectPKInfo SubjectPublicKeyInfo

@@ -346,7 +346,7 @@ static const unsigned char sha256_test_buf[3][57] =
     { "" }
 };
 
-static const int sha256_test_buflen[3] =
+static const size_t sha256_test_buflen[3] =
 {
     3, 56, 1000
 };
@@ -391,7 +391,8 @@ static const unsigned char sha256_test_sum[6][32] =
  */
 int mbedtls_sha256_self_test( int verbose )
 {
-    int i, j, k, buflen, ret = 0;
+    int i, j, k, ret = 0;
+    size_t buflen;
     unsigned char *buf;
     unsigned char sha256sum[32];
     mbedtls_sha256_context ctx;
@@ -430,7 +431,7 @@ int mbedtls_sha256_self_test( int verbose )
 
         mbedtls_sha256_finish( &ctx, sha256sum );
 
-        if( memcmp( sha256sum, sha256_test_sum[i], 32 - k * 4 ) != 0 )
+        if( memcmp( sha256sum, sha256_test_sum[i], (size_t) ( 32 - k * 4 ) ) != 0 )
         {
             if( verbose != 0 )
                 mbedtls_printf( "failed\n" );

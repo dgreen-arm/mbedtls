@@ -484,7 +484,7 @@ static int pk_get_ecpubkey( unsigned char **p, const unsigned char *end,
     int ret;
 
     if( ( ret = mbedtls_ecp_point_read_binary( &key->grp, &key->Q,
-                    (const unsigned char *) *p, end - *p ) ) == 0 )
+                    (const unsigned char *) *p, (size_t) ( end - *p ) ) ) == 0 )
     {
         ret = mbedtls_ecp_check_pubkey( &key->grp, &key->Q );
     }

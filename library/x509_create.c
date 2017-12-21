@@ -103,7 +103,7 @@ int mbedtls_x509_string_to_names( mbedtls_asn1_named_data **head, const char *na
     {
         if( in_tag && *c == '=' )
         {
-            if( ( oid = x509_at_oid_from_name( s, c - s ) ) == NULL )
+            if( ( oid = x509_at_oid_from_name( s, (size_t) ( c - s ) ) ) == NULL )
             {
                 ret = MBEDTLS_ERR_X509_UNKNOWN_OID;
                 goto exit;
@@ -129,7 +129,7 @@ int mbedtls_x509_string_to_names( mbedtls_asn1_named_data **head, const char *na
         {
             if( mbedtls_asn1_store_named_data( head, oid, strlen( oid ),
                                        (unsigned char *) data,
-                                       d - data ) == NULL )
+                                       (size_t) ( d - data ) ) == NULL )
             {
                 return( MBEDTLS_ERR_X509_ALLOC_FAILED );
             }
@@ -174,7 +174,7 @@ int mbedtls_x509_set_extension( mbedtls_asn1_named_data **head, const char *oid,
         return( MBEDTLS_ERR_X509_ALLOC_FAILED );
     }
 
-    cur->val.p[0] = critical;
+    cur->val.p[0] = (unsigned char) critical;
     memcpy( cur->val.p + 1, val, val_len );
 
     return( 0 );

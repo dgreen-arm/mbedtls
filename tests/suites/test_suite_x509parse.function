@@ -95,7 +95,7 @@ int verify_print( void *data, mbedtls_x509_crt *crt, int certificate_depth, uint
     int ret;
     verify_print_context *ctx = (verify_print_context *) data;
     char *p = ctx->p;
-    size_t n = ctx->buf + sizeof( ctx->buf ) - ctx->p;
+    size_t n = (size_t) ( ctx->buf + sizeof( ctx->buf ) - ctx->p );
     ((void) flags);
 
     ret = mbedtls_snprintf( p, n, "depth %d - serial ", certificate_depth );
@@ -218,7 +218,7 @@ void x509_verify_info( int flags, char *prefix, char *result_str )
 
     memset( buf, 0, sizeof( buf ) );
 
-    res = mbedtls_x509_crt_verify_info( buf, sizeof( buf ), prefix, flags );
+    res = mbedtls_x509_crt_verify_info( buf, sizeof( buf ), prefix, (uint32_t) flags );
 
     TEST_ASSERT( res >= 0 );
 
@@ -401,7 +401,8 @@ void x509parse_crt( char *crt_data, char *result_str, int result )
     mbedtls_x509_crt   crt;
     unsigned char buf[2000];
     unsigned char output[2000];
-    int data_len, res;
+    unsigned int data_len;
+    int res;
 
     mbedtls_x509_crt_init( &crt );
     memset( buf, 0, 2000 );
@@ -431,7 +432,8 @@ void x509parse_crl( char *crl_data, char *result_str, int result )
     mbedtls_x509_crl   crl;
     unsigned char buf[2000];
     unsigned char output[2000];
-    int data_len, res;
+    unsigned int data_len;
+    int res;
 
     mbedtls_x509_crl_init( &crl );
     memset( buf, 0, 2000 );
@@ -473,7 +475,7 @@ void mbedtls_x509_csr_parse( char *csr_der_hex, char *ref_out, int ref_ret )
 
     if( ref_ret == 0 )
     {
-        size_t my_out_len = mbedtls_x509_csr_info( my_out, sizeof( my_out ), "", &csr );
+        size_t my_out_len = (size_t) mbedtls_x509_csr_info( my_out, sizeof( my_out ), "", &csr );
         TEST_ASSERT( my_out_len == strlen( ref_out ) );
         TEST_ASSERT( strcmp( my_out, ref_out ) == 0 );
     }
@@ -619,7 +621,7 @@ void x509_oid_numstr( char *oid_str, char *numstr, int blen, int ret )
 
     TEST_ASSERT( (size_t) blen <= sizeof num_buf );
 
-    TEST_ASSERT( mbedtls_oid_get_numeric_string( num_buf, blen, &oid ) == ret );
+    TEST_ASSERT( mbedtls_oid_get_numeric_string( num_buf, (size_t) blen, &oid ) == ret );
 
     if( ret >= 0 )
     {
@@ -638,7 +640,7 @@ void x509_check_key_usage( char *crt_file, int usage, int ret )
 
     TEST_ASSERT( mbedtls_x509_crt_parse_file( &crt, crt_file ) == 0 );
 
-    TEST_ASSERT( mbedtls_x509_crt_check_key_usage( &crt, usage ) == ret );
+    TEST_ASSERT( mbedtls_x509_crt_check_key_usage( &crt, (unsigned int) usage ) == ret );
 
 exit:
     mbedtls_x509_crt_free( &crt );
@@ -676,8 +678,8 @@ void x509_get_time( int tag,  char *time_str, int ret,
     unsigned char* end = buf;
 
     memset( &time, 0x00, sizeof( time ) );
-    *end = (unsigned char)tag; end++;
-    *end = strlen( time_str );
+    *end = (unsigned char) tag; end++;
+    *end = (unsigned char) strlen( time_str );
     TEST_ASSERT( *end < 20 );
     end++;
     memcpy( end, time_str, (size_t)*(end - 1) );

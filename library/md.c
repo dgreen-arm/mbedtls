@@ -193,7 +193,7 @@ void mbedtls_md_free( mbedtls_md_context_t *ctx )
 
     if( ctx->hmac_ctx != NULL )
     {
-        mbedtls_zeroize( ctx->hmac_ctx, 2 * ctx->md_info->block_size );
+        mbedtls_zeroize( ctx->hmac_ctx, (size_t) ( 2 * ctx->md_info->block_size ) );
         mbedtls_free( ctx->hmac_ctx );
     }
 
@@ -232,7 +232,7 @@ int mbedtls_md_setup( mbedtls_md_context_t *ctx, const mbedtls_md_info_t *md_inf
 
     if( hmac != 0 )
     {
-        ctx->hmac_ctx = mbedtls_calloc( 2, md_info->block_size );
+        ctx->hmac_ctx = mbedtls_calloc( 2, (size_t) md_info->block_size );
         if( ctx->hmac_ctx == NULL )
         {
             md_info->ctx_free_func( ctx->md_ctx );
@@ -342,15 +342,15 @@ int mbedtls_md_hmac_starts( mbedtls_md_context_t *ctx, const unsigned char *key,
         ctx->md_info->update_func( ctx->md_ctx, key, keylen );
         ctx->md_info->finish_func( ctx->md_ctx, sum );
 
-        keylen = ctx->md_info->size;
+        keylen = (size_t) ctx->md_info->size;
         key = sum;
     }
 
     ipad = (unsigned char *) ctx->hmac_ctx;
     opad = (unsigned char *) ctx->hmac_ctx + ctx->md_info->block_size;
 
-    memset( ipad, 0x36, ctx->md_info->block_size );
-    memset( opad, 0x5C, ctx->md_info->block_size );
+    memset( ipad, 0x36, (size_t) ctx->md_info->block_size );
+    memset( opad, 0x5C, (size_t) ctx->md_info->block_size );
 
     for( i = 0; i < keylen; i++ )
     {
@@ -361,7 +361,7 @@ int mbedtls_md_hmac_starts( mbedtls_md_context_t *ctx, const unsigned char *key,
     mbedtls_zeroize( sum, sizeof( sum ) );
 
     ctx->md_info->starts_func( ctx->md_ctx );
-    ctx->md_info->update_func( ctx->md_ctx, ipad, ctx->md_info->block_size );
+    ctx->md_info->update_func( ctx->md_ctx, ipad, (size_t) ctx->md_info->block_size );
 
     return( 0 );
 }
@@ -388,8 +388,8 @@ int mbedtls_md_hmac_finish( mbedtls_md_context_t *ctx, unsigned char *output )
 
     ctx->md_info->finish_func( ctx->md_ctx, tmp );
     ctx->md_info->starts_func( ctx->md_ctx );
-    ctx->md_info->update_func( ctx->md_ctx, opad, ctx->md_info->block_size );
-    ctx->md_info->update_func( ctx->md_ctx, tmp, ctx->md_info->size );
+    ctx->md_info->update_func( ctx->md_ctx, opad, (size_t) ctx->md_info->block_size );
+    ctx->md_info->update_func( ctx->md_ctx, tmp, (size_t) ctx->md_info->size );
     ctx->md_info->finish_func( ctx->md_ctx, output );
 
     return( 0 );
@@ -405,7 +405,7 @@ int mbedtls_md_hmac_reset( mbedtls_md_context_t *ctx )
     ipad = (unsigned char *) ctx->hmac_ctx;
 
     ctx->md_info->starts_func( ctx->md_ctx );
-    ctx->md_info->update_func( ctx->md_ctx, ipad, ctx->md_info->block_size );
+    ctx->md_info->update_func( ctx->md_ctx, ipad, (size_t) ctx->md_info->block_size );
 
     return( 0 );
 }
@@ -449,7 +449,7 @@ unsigned char mbedtls_md_get_size( const mbedtls_md_info_t *md_info )
     if( md_info == NULL )
         return( 0 );
 
-    return md_info->size;
+    return (unsigned char) md_info->size;
 }
 
 mbedtls_md_type_t mbedtls_md_get_type( const mbedtls_md_info_t *md_info )

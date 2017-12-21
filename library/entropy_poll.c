@@ -102,7 +102,7 @@ static int getrandom_wrapper( void *buf, size_t buflen, unsigned int flags )
 #endif
 #endif
 
-    return( syscall( SYS_getrandom, buf, buflen, flags ) );
+    return( (int) syscall( SYS_getrandom, buf, buflen, flags ) );
 }
 
 #include <sys/utsname.h>
@@ -165,7 +165,7 @@ int mbedtls_platform_entropy_poll( void *data,
         if( ( ret = getrandom_wrapper( output, len, 0 ) ) < 0 )
             return( MBEDTLS_ERR_ENTROPY_SOURCE_FAILED );
 
-        *olen = ret;
+        *olen = (size_t) ret;
         return( 0 );
     }
 #endif /* HAVE_GETRANDOM */

@@ -119,7 +119,7 @@ void pk_parse_key_rsa( char *key_data, char *result_str, int result )
     mbedtls_pk_context pk;
     unsigned char buf[2000];
     unsigned char output[2000];
-    int data_len;
+    unsigned int data_len;
     ((void) result_str);
 
     mbedtls_pk_init( &pk );

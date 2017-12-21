@@ -107,7 +107,7 @@ static int ssl_ticket_update_keys( mbedtls_ssl_ticket_context *ctx )
             return( 0 );
         }
 
-        ctx->active = 1 - ctx->active;
+        ctx->active = (unsigned char) ( 1 - ctx->active );
 
         return( ssl_ticket_gen_key( ctx, ctx->active ) );
     }
@@ -202,7 +202,7 @@ static int ssl_save_session( const mbedtls_ssl_session *session,
     p += cert_len;
 #endif /* MBEDTLS_X509_CRT_PARSE_C */
 
-    *olen = p - buf;
+    *olen = (size_t) ( p - buf );
 
     return( 0 );
 }
@@ -229,7 +229,7 @@ static int ssl_load_session( mbedtls_ssl_session *session,
     if( p + 3 > end )
         return( MBEDTLS_ERR_SSL_BAD_INPUT_DATA );
 
-    cert_len = ( p[0] << 16 ) | ( p[1] << 8 ) | p[2];
+    cert_len = (size_t) ( ( p[0] << 16 ) | ( p[1] << 8 ) | p[2] );
     p += 3;
 
     if( cert_len == 0 )
@@ -328,7 +328,7 @@ int mbedtls_ssl_ticket_write( void *p_ticket,
 
     /* Dump session state */
     if( ( ret = ssl_save_session( session,
-                                  state, end - state, &clear_len ) ) != 0 ||
+                                  state, (size_t) ( end - state) , &clear_len ) ) != 0 ||
         (unsigned long) clear_len > 65535 )
     {
          goto cleanup;
@@ -410,7 +410,7 @@ int mbedtls_ssl_ticket_parse( void *p_ticket,
     if( ( ret = ssl_ticket_update_keys( ctx ) ) != 0 )
         goto cleanup;
 
-    enc_len = ( enc_len_p[0] << 8 ) | enc_len_p[1];
+    enc_len = (size_t) ( ( enc_len_p[0] << 8 ) | enc_len_p[1] );
     tag = ticket + enc_len;
 
     if( len != 4 + 12 + 2 + enc_len + 16 )

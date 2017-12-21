@@ -793,9 +793,9 @@ int mbedtls_rsa_rsaes_oaep_decrypt( mbedtls_rsa_context *ctx,
                             unsigned char *output,
                             size_t output_max_len )
 {
-    int ret;
+    int bad, ret;
     size_t ilen, i, pad_len;
-    unsigned char *p, bad, pad_done;
+    unsigned char *p, pad_done;
     unsigned char buf[MBEDTLS_MPI_MAX_SIZE];
     unsigned char lhash[MBEDTLS_MD_MAX_SIZE];
     unsigned int hlen;
@@ -896,13 +896,13 @@ int mbedtls_rsa_rsaes_oaep_decrypt( mbedtls_rsa_context *ctx,
         goto cleanup;
     }
 
-    if( ilen - ( p - buf ) > output_max_len )
+    if( ilen - (size_t) ( p - buf ) > output_max_len )
     {
         ret = MBEDTLS_ERR_RSA_OUTPUT_TOO_LARGE;
         goto cleanup;
     }
 
-    *olen = ilen - (p - buf);
+    *olen = ilen - (size_t) (p - buf);
     memcpy( output, p, *olen );
     ret = 0;
 
@@ -926,9 +926,9 @@ int mbedtls_rsa_rsaes_pkcs1_v15_decrypt( mbedtls_rsa_context *ctx,
                                  unsigned char *output,
                                  size_t output_max_len)
 {
-    int ret;
+    int bad, ret;
     size_t ilen, pad_count = 0, i;
-    unsigned char *p, bad, pad_done = 0;
+    unsigned char *p, pad_done = 0;
     unsigned char buf[MBEDTLS_MPI_MAX_SIZE];
 
     if( mode == MBEDTLS_RSA_PRIVATE && ctx->padding != MBEDTLS_RSA_PKCS_V15 )
@@ -978,7 +978,7 @@ int mbedtls_rsa_rsaes_pkcs1_v15_decrypt( mbedtls_rsa_context *ctx,
          * (minus one, for the 00 byte) */
         for( i = 0; i < ilen - 3; i++ )
         {
-            pad_done |= ( p[i] != 0xFF );
+            pad_done = (unsigned char) ( pad_done | ( p[i] != 0xFF ) );
             pad_count += ( pad_done == 0 );
         }
 
@@ -994,13 +994,13 @@ int mbedtls_rsa_rsaes_pkcs1_v15_decrypt( mbedtls_rsa_context *ctx,
         goto cleanup;
     }
 
-    if( ilen - ( p - buf ) > output_max_len )
+    if( ilen - (size_t) ( p - buf ) > output_max_len )
     {
         ret = MBEDTLS_ERR_RSA_OUTPUT_TOO_LARGE;
         goto cleanup;
     }
 
-    *olen = ilen - (p - buf);
+    *olen = ilen - (size_t) (p - buf);
     memcpy( output, p, *olen );
     ret = 0;
 
@@ -1131,7 +1131,7 @@ int mbedtls_rsa_rsassa_pss_sign( mbedtls_rsa_context *ctx,
     mbedtls_md_free( &md_ctx );
 
     msb = mbedtls_mpi_bitlen( &ctx->N ) - 1;
-    sig[0] &= 0xFF >> ( olen * 8 - msb );
+    sig[0] = (unsigned char) ( sig[0] & 0xFF >> ( olen * 8 - msb ) );
 
     p += hlen;
     *p++ = 0xBC;
@@ -1224,7 +1224,7 @@ int mbedtls_rsa_rsassa_pkcs1_v15_sign( mbedtls_rsa_context *ctx,
         *p++ = MBEDTLS_ASN1_NULL;
         *p++ = 0x00;
         *p++ = MBEDTLS_ASN1_OCTET_STRING;
-        *p++ = hashlen;
+        *p++ = (unsigned char) hashlen;
         memcpy( p, hash, hashlen );
     }
 
@@ -1389,7 +1389,7 @@ int mbedtls_rsa_rsassa_pss_verify_ext( mbedtls_rsa_context *ctx,
 
     mgf_mask( p, siglen - hlen - 1, p + siglen - hlen - 1, hlen, &md_ctx );
 
-    buf[0] &= 0xFF >> ( siglen * 8 - msb );
+    buf[0] = (unsigned char) ( buf[0] & ( 0xFF >> ( siglen * 8 - msb ) ) );
 
     while( p < buf + siglen && *p == 0 )
         p++;
@@ -1402,7 +1402,7 @@ int mbedtls_rsa_rsassa_pss_verify_ext( mbedtls_rsa_context *ctx,
     }
 
     /* Actual salt len */
-    slen -= p - buf;
+    slen -= (size_t) ( p - buf );
 
     if( expected_salt_len != MBEDTLS_RSA_SALT_LEN_ANY &&
         slen != (size_t) expected_salt_len )
@@ -1505,7 +1505,7 @@ int mbedtls_rsa_rsassa_pkcs1_v15_verify( mbedtls_rsa_context *ctx,
     if( p - buf < 11 )
         return( MBEDTLS_ERR_RSA_INVALID_PADDING );
 
-    len = siglen - ( p - buf );
+    len = siglen - (size_t) ( p - buf );
 
     if( len == hashlen && md_alg == MBEDTLS_MD_NONE )
     {
@@ -1735,7 +1735,7 @@ static int myrand( void *rng_state, unsigned char *output, size_t len )
         rng_state  = NULL;
 
     for( i = 0; i < len; ++i )
-        output[i] = rand();
+        output[i] = (unsigned char) rand();
 #else
     if( rng_state != NULL )
         rng_state = NULL;

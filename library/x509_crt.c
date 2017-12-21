@@ -151,7 +151,7 @@ const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_suiteb =
 static int x509_profile_check_md_alg( const mbedtls_x509_crt_profile *profile,
                                       mbedtls_md_type_t md_alg )
 {
-    if( ( profile->allowed_mds & MBEDTLS_X509_ID_FLAG( md_alg ) ) != 0 )
+    if( ( profile->allowed_mds & (unsigned int) MBEDTLS_X509_ID_FLAG( md_alg ) ) != 0 )
         return( 0 );
 
     return( -1 );
@@ -164,7 +164,7 @@ static int x509_profile_check_md_alg( const mbedtls_x509_crt_profile *profile,
 static int x509_profile_check_pk_alg( const mbedtls_x509_crt_profile *profile,
                                       mbedtls_pk_type_t pk_alg )
 {
-    if( ( profile->allowed_pks & MBEDTLS_X509_ID_FLAG( pk_alg ) ) != 0 )
+    if( ( profile->allowed_pks & (unsigned int) MBEDTLS_X509_ID_FLAG( pk_alg ) ) != 0 )
         return( 0 );
 
     return( -1 );
@@ -195,7 +195,7 @@ static int x509_profile_check_key( const mbedtls_x509_crt_profile *profile,
     {
         mbedtls_ecp_group_id gid = mbedtls_pk_ec( *pk )->grp.id;
 
-        if( ( profile->allowed_curves & MBEDTLS_X509_ID_FLAG( gid ) ) != 0 )
+        if( ( profile->allowed_curves & (unsigned int) MBEDTLS_X509_ID_FLAG( gid ) ) != 0 )
             return( 0 );
 
         return( -1 );
@@ -706,7 +706,7 @@ static int x509_crt_parse_der_core( mbedtls_x509_crt *crt, const unsigned char *
     crt_end = p + len;
 
     // Create and populate a new buffer for the raw field
-    crt->raw.len = crt_end - buf;
+    crt->raw.len = (size_t) ( crt_end - buf );
     crt->raw.p = p = mbedtls_calloc( 1, crt->raw.len );
     if( p == NULL )
         return( MBEDTLS_ERR_X509_ALLOC_FAILED );
@@ -730,7 +730,7 @@ static int x509_crt_parse_der_core( mbedtls_x509_crt *crt, const unsigned char *
     }
 
     end = p + len;
-    crt->tbs.len = end - crt->tbs.p;
+    crt->tbs.len = (size_t) ( end - crt->tbs.p );
 
     /*
      * Version  ::=  INTEGER  {  v1(0), v2(1), v3(2)  }
@@ -782,7 +782,7 @@ static int x509_crt_parse_der_core( mbedtls_x509_crt *crt, const unsigned char *
         return( ret );
     }
 
-    crt->issuer_raw.len = p - crt->issuer_raw.p;
+    crt->issuer_raw.len = (size_t) ( p - crt->issuer_raw.p );
 
     /*
      * Validity ::= SEQUENCE {
@@ -815,7 +815,7 @@ static int x509_crt_parse_der_core( mbedtls_x509_crt *crt, const unsigned char *
         return( ret );
     }
 
-    crt->subject_raw.len = p - crt->subject_raw.p;
+    crt->subject_raw.len = (size_t) ( p - crt->subject_raw.p );
 
     /*
      * SubjectPublicKeyInfo
@@ -1247,7 +1247,7 @@ static int x509_info_subject_alt_name( char **buf, size_t *size,
         for( i = 0; i < sep_len; i++ )
             *p++ = sep[i];
         for( i = 0; i < cur->buf.len; i++ )
-            *p++ = cur->buf.p[i];
+            *p++ = (char) cur->buf.p[i];
 
         sep = ", ";
         sep_len = 2;
@@ -1530,12 +1530,12 @@ int mbedtls_x509_crt_verify_info( char *buf, size_t size, const char *prefix,
 
     for( cur = x509_crt_verify_strings; cur->string != NULL ; cur++ )
     {
-        if( ( flags & cur->code ) == 0 )
+        if( ( flags & (uint32_t) cur->code ) == 0 )
             continue;
 
         ret = mbedtls_snprintf( p, n, "%s%s\n", prefix, cur->string );
         MBEDTLS_X509_SAFE_SNPRINTF;
-        flags ^= cur->code;
+        flags ^= (uint32_t) cur->code;
     }
 
     if( flags != 0 )
@@ -1989,7 +1989,7 @@ static int x509_crt_verify_top(
         /*
          * Top of chain is signed by a trusted CA
          */
-        *flags &= ~MBEDTLS_X509_BADCERT_NOT_TRUSTED;
+        *flags &= (uint32_t) ~MBEDTLS_X509_BADCERT_NOT_TRUSTED;
 
         if( x509_profile_check_key( profile, child->sig_pk, &trust_ca->pk ) != 0 )
             *flags |= MBEDTLS_X509_BADCERT_BAD_KEY;
@@ -2007,7 +2007,7 @@ static int x509_crt_verify_top(
     {
 #if defined(MBEDTLS_X509_CRL_PARSE_C)
         /* Check trusted CA's CRL for the chain's top crt */
-        *flags |= x509_crt_verifycrl( child, trust_ca, ca_crl, profile );
+        *flags |= (uint32_t) x509_crt_verifycrl( child, trust_ca, ca_crl, profile );
 #else
         ((void) ca_crl);
 #endif
@@ -2102,7 +2102,7 @@ static int x509_crt_verify_child(
 
 #if defined(MBEDTLS_X509_CRL_PARSE_C)
     /* Check trusted CA's CRL for the given crt */
-    *flags |= x509_crt_verifycrl(child, parent, ca_crl, profile );
+    *flags |= (uint32_t) x509_crt_verifycrl(child, parent, ca_crl, profile );
 #endif
 
     /* Look for a grandparent in trusted CAs */

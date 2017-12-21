@@ -16,7 +16,7 @@ void aes_encrypt_ecb( char *hex_key_string, char *hex_src_string,
     unsigned char dst_str[100];
     unsigned char output[100];
     mbedtls_aes_context ctx;
-    int key_len;
+    unsigned int key_len;
 
     memset(key_str, 0x00, 100);
     memset(src_str, 0x00, 100);
@@ -50,7 +50,7 @@ void aes_decrypt_ecb( char *hex_key_string, char *hex_src_string,
     unsigned char dst_str[100];
     unsigned char output[100];
     mbedtls_aes_context ctx;
-    int key_len;
+    unsigned int key_len;
 
     memset(key_str, 0x00, 100);
     memset(src_str, 0x00, 100);
@@ -86,7 +86,7 @@ void aes_encrypt_cbc( char *hex_key_string, char *hex_iv_string,
     unsigned char dst_str[100];
     unsigned char output[100];
     mbedtls_aes_context ctx;
-    int key_len, data_len;
+    unsigned int key_len, data_len;
 
     memset(key_str, 0x00, 100);
     memset(iv_str, 0x00, 100);
@@ -124,7 +124,7 @@ void aes_decrypt_cbc( char *hex_key_string, char *hex_iv_string,
     unsigned char dst_str[100];
     unsigned char output[100];
     mbedtls_aes_context ctx;
-    int key_len, data_len;
+    unsigned int key_len, data_len;
 
     memset(key_str, 0x00, 100);
     memset(iv_str, 0x00, 100);
@@ -162,7 +162,7 @@ void aes_encrypt_cfb128( char *hex_key_string, char *hex_iv_string,
     unsigned char output[100];
     mbedtls_aes_context ctx;
     size_t iv_offset = 0;
-    int key_len;
+    unsigned int key_len;
 
     memset(key_str, 0x00, 100);
     memset(iv_str, 0x00, 100);
@@ -197,7 +197,7 @@ void aes_decrypt_cfb128( char *hex_key_string, char *hex_iv_string,
     unsigned char output[100];
     mbedtls_aes_context ctx;
     size_t iv_offset = 0;
-    int key_len;
+    unsigned int key_len;
 
     memset(key_str, 0x00, 100);
     memset(iv_str, 0x00, 100);
@@ -231,7 +231,7 @@ void aes_encrypt_cfb8( char *hex_key_string, char *hex_iv_string,
     unsigned char dst_str[100];
     unsigned char output[100];
     mbedtls_aes_context ctx;
-    int key_len, src_len;
+    unsigned int key_len, src_len;
 
     memset(key_str, 0x00, 100);
     memset(iv_str, 0x00, 100);
@@ -265,7 +265,7 @@ void aes_decrypt_cfb8( char *hex_key_string, char *hex_iv_string,
     unsigned char dst_str[100];
     unsigned char output[100];
     mbedtls_aes_context ctx;
-    int key_len, src_len;
+    unsigned int key_len, src_len;
 
     memset(key_str, 0x00, 100);
     memset(iv_str, 0x00, 100);

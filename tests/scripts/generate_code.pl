@@ -362,7 +362,7 @@ while( my ($key, $value) = each(%mapping_values) )
     my $key_mapping_code = << "END";
     if( strcmp( str, "$key" ) == 0 )
     {
-        *value = ( $key );
+        *value = (int) ( $key );
         return( KEY_VALUE_MAPPING_FOUND );
     }
 END

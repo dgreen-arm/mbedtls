@@ -298,8 +298,8 @@ unsigned long mbedtls_timing_get_timer( struct mbedtls_timing_hr_time *val, int 
         return( 0 );
     }
 
-    delta = ( offset.tv_sec  - t->start.tv_sec  ) * 1000
-          + ( offset.tv_usec - t->start.tv_usec ) / 1000;
+    delta = (unsigned long) ( ( offset.tv_sec  - t->start.tv_sec  ) * 1000
+          + ( offset.tv_usec - t->start.tv_usec ) / 1000 );
 
     return( delta );
 }
@@ -314,7 +314,7 @@ void mbedtls_set_alarm( int seconds )
 {
     mbedtls_timing_alarmed = 0;
     signal( SIGALRM, sighandler );
-    alarm( seconds );
+    alarm( (unsigned int) seconds );
 }
 
 #endif /* _WIN32 && !EFIX64 && !EFI32 */

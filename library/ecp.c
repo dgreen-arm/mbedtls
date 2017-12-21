@@ -488,7 +488,7 @@ int mbedtls_ecp_point_write_binary( const mbedtls_ecp_group *grp, const mbedtls_
         if( buflen < *olen )
             return( MBEDTLS_ERR_ECP_BUFFER_TOO_SMALL );
 
-        buf[0] = 0x02 + mbedtls_mpi_get_bit( &P->Y, 0 );
+        buf[0] = (unsigned char) ( 0x02 + mbedtls_mpi_get_bit( &P->Y, 0 ) );
         MBEDTLS_MPI_CHK( mbedtls_mpi_write_binary( &P->X, buf + 1, plen ) );
     }
 
@@ -618,8 +618,8 @@ int mbedtls_ecp_tls_read_group( mbedtls_ecp_group *grp, const unsigned char **bu
      * Next two bytes are the namedcurve value
      */
     tls_id = *(*buf)++;
-    tls_id <<= 8;
-    tls_id |= *(*buf)++;
+    tls_id = (uint16_t) ( tls_id << 8 );
+    tls_id = (uint16_t) ( tls_id | *(*buf)++ );
 
     if( ( curve_info = mbedtls_ecp_curve_info_from_tls_id( tls_id ) ) == NULL )
         return( MBEDTLS_ERR_ECP_FEATURE_UNAVAILABLE );
@@ -653,8 +653,8 @@ int mbedtls_ecp_tls_write_group( const mbedtls_ecp_group *grp, size_t *olen,
     /*
      * Next two bytes are the namedcurve value
      */
-    buf[0] = curve_info->tls_id >> 8;
-    buf[1] = curve_info->tls_id & 0xFF;
+    buf[0] = (unsigned char) ( curve_info->tls_id >> 8 );
+    buf[1] = (unsigned char) ( curve_info->tls_id & 0xFF );
 
     return( 0 );
 }
@@ -1199,7 +1199,7 @@ static void ecp_comb_fixed( unsigned char x[], size_t d,
     /* First get the classical comb values (except for x_d = 0) */
     for( i = 0; i < d; i++ )
         for( j = 0; j < w; j++ )
-            x[i] |= mbedtls_mpi_get_bit( m, i + d * j ) << j;
+            x[i] |= (unsigned char) ( mbedtls_mpi_get_bit( m, i + d * j ) << j );
 
     /* Now make sure x_1 .. x_d are odd */
     c = 0;
@@ -1212,9 +1212,9 @@ static void ecp_comb_fixed( unsigned char x[], size_t d,
 
         /* Adjust if needed, avoiding branches */
         adjust = 1 - ( x[i] & 0x01 );
-        c   |= x[i] & ( x[i-1] * adjust );
-        x[i] = x[i] ^ ( x[i-1] * adjust );
-        x[i-1] |= adjust << 7;
+        c   |= (unsigned char) ( x[i] & ( x[i-1] * adjust ) );
+        x[i] = (unsigned char) ( x[i] ^ ( x[i-1] * adjust ) );
+        x[i-1] |= (unsigned char) ( adjust << 7 );
     }
 }
 
@@ -1244,7 +1244,7 @@ static int ecp_precompute_comb( const mbedtls_ecp_group *grp,
     MBEDTLS_MPI_CHK( mbedtls_ecp_copy( &T[0], P ) );
 
     k = 0;
-    for( i = 1; i < ( 1U << ( w - 1 ) ); i <<= 1 )
+    for( i = 1; i < ( 1U << ( w - 1 ) ); i = (unsigned char) ( i << 1 ) )
     {
         cur = T + i;
         MBEDTLS_MPI_CHK( mbedtls_ecp_copy( cur, T + ( i >> 1 ) ) );
@@ -1261,7 +1261,7 @@ static int ecp_precompute_comb( const mbedtls_ecp_group *grp,
      * Be careful to update T[2^l] only after using it!
      */
     k = 0;
-    for( i = 1; i < ( 1U << ( w - 1 ) ); i <<= 1 )
+    for( i = 1; i < ( 1U << ( w - 1 ) ); i = (unsigned char) ( i << 1 ) )
     {
         j = i;
         while( j-- )
@@ -1289,7 +1289,7 @@ static int ecp_select_comb( const mbedtls_ecp_group *grp, mbedtls_ecp_point *R,
     unsigned char ii, j;
 
     /* Ignore the "sign" bit and scale down */
-    ii =  ( i & 0x7Fu ) >> 1;
+    ii = (unsigned char) ( ( i & 0x7Fu ) >> 1 );
 
     /* Read the whole table to thwart cache-based timing attacks */
     for( j = 0; j < t_len; j++ )
@@ -1398,7 +1398,7 @@ static int ecp_mul_comb( mbedtls_ecp_group *grp, mbedtls_ecp_point *R,
         w = 2;
 
     /* Other sizes that depend on w */
-    pre_len = 1U << ( w - 1 );
+    pre_len = (unsigned char) ( 1U << ( w - 1 ) );
     d = ( grp->nbits + w - 1 ) / w;
 
     /*
@@ -1644,7 +1644,7 @@ static int ecp_mul_mxz( mbedtls_ecp_group *grp, mbedtls_ecp_point *R,
     i = mbedtls_mpi_bitlen( m ); /* one past the (zero-based) most significant bit */
     while( i-- > 0 )
     {
-        b = mbedtls_mpi_get_bit( m, i );
+        b = (unsigned char) mbedtls_mpi_get_bit( m, i );
         /*
          *  if (b) R = 2R + P else R = 2R,
          * which is:

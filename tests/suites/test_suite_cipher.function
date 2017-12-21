@@ -133,7 +133,7 @@ exit:
 void enc_dec_buf( int cipher_id, char *cipher_string, int key_len,
                   int length_val, int pad_mode )
 {
-    size_t length = length_val, outlen, total_len, i, block_size;
+    size_t length = (size_t) length_val, outlen, total_len, i, block_size;
     unsigned char key[32];
     unsigned char iv[16];
     unsigned char ad[13];
@@ -181,9 +181,9 @@ void enc_dec_buf( int cipher_id, char *cipher_string, int key_len,
      */
     for( i = 0; i < 3; i++ )
     {
-    memset( iv , 0x00 + i, sizeof( iv ) );
-    memset( ad, 0x10 + i, sizeof( ad ) );
-    memset( inbuf, 0x20 + i, sizeof( inbuf ) );
+    memset( iv , (int) ( 0x00 + i ), sizeof( iv ) );
+    memset( ad, (int) ( 0x10 + i ), sizeof( ad ) );
+    memset( inbuf, (int) ( 0x20 + i ), sizeof( inbuf ) );
 
     memset( encbuf, 0, sizeof( encbuf ) );
     memset( decbuf, 0, sizeof( decbuf ) );
@@ -258,7 +258,7 @@ exit:
 void enc_fail( int cipher_id, int pad_mode, int key_len,
                int length_val, int ret )
 {
-    size_t length = length_val;
+    size_t length = (size_t) length_val;
     unsigned char key[32];
     unsigned char iv[16];
 
@@ -360,8 +360,8 @@ exit:
 void enc_dec_buf_multipart( int cipher_id, int key_len, int first_length_val,
                             int second_length_val )
 {
-    size_t first_length = first_length_val;
-    size_t second_length = second_length_val;
+    size_t first_length = (size_t) first_length_val;
+    size_t second_length = (size_t) second_length_val;
     size_t length = first_length + second_length;
     size_t block_size;
     unsigned char key[32];
@@ -464,7 +464,8 @@ void decrypt_test_vec( int cipher_id, int pad_mode,
     unsigned char clear[200];
     unsigned char ad[200];
     unsigned char tag[20];
-    size_t key_len, iv_len, cipher_len, clear_len;
+    unsigned int key_len;
+    size_t iv_len, cipher_len, clear_len;
 #if defined(MBEDTLS_GCM_C)
     size_t ad_len, tag_len;
 #endif
@@ -497,7 +498,7 @@ void decrypt_test_vec( int cipher_id, int pad_mode,
     /* Prepare context */
     TEST_ASSERT( 0 == mbedtls_cipher_setup( &ctx,
                                        mbedtls_cipher_info_from_type( cipher_id ) ) );
-    TEST_ASSERT( 0 == mbedtls_cipher_setkey( &ctx, key, 8 * key_len, MBEDTLS_DECRYPT ) );
+    TEST_ASSERT( 0 == mbedtls_cipher_setkey( &ctx, key, 8 * (int) key_len, MBEDTLS_DECRYPT ) );
 #if defined(MBEDTLS_CIPHER_MODE_WITH_PADDING)
     if( pad_mode != -1 )
         TEST_ASSERT( 0 == mbedtls_cipher_set_padding_mode( &ctx, pad_mode ) );
@@ -546,10 +547,10 @@ void auth_crypt_tv( int cipher_id, char *hex_key, char *hex_iv,
     unsigned char ad[200];
     unsigned char tag[20];
     unsigned char my_tag[20];
-    size_t key_len, iv_len, cipher_len, clear_len, ad_len, tag_len;
+    unsigned int key_len;
+    size_t iv_len, cipher_len, clear_len, ad_len, tag_len, outlen;
     mbedtls_cipher_context_t ctx;
     unsigned char output[200];
-    size_t outlen;
 
     mbedtls_cipher_init( &ctx );
 
@@ -571,7 +572,7 @@ void auth_crypt_tv( int cipher_id, char *hex_key, char *hex_iv,
     /* Prepare context */
     TEST_ASSERT( 0 == mbedtls_cipher_setup( &ctx,
                                        mbedtls_cipher_info_from_type( cipher_id ) ) );
-    TEST_ASSERT( 0 == mbedtls_cipher_setkey( &ctx, key, 8 * key_len, MBEDTLS_DECRYPT ) );
+    TEST_ASSERT( 0 == mbedtls_cipher_setkey( &ctx, key, 8 * (int) key_len, MBEDTLS_DECRYPT ) );
 
     /* decode buffer and check tag */
     ret = mbedtls_cipher_auth_decrypt( &ctx, iv, iv_len, ad, ad_len,
@@ -629,7 +630,7 @@ void test_vec_ecb( int cipher_id, int operation, char *hex_key,
     unsigned char key[50];
     unsigned char input[16];
     unsigned char result[16];
-    size_t key_len;
+    unsigned int key_len;
     mbedtls_cipher_context_t ctx;
     unsigned char output[32];
     size_t outlen;
@@ -647,11 +648,11 @@ void test_vec_ecb( int cipher_id, int operation, char *hex_key,
 
     key_len = unhexify( key, hex_key );
     TEST_ASSERT( unhexify( input, hex_input ) ==
-                 (int) mbedtls_cipher_get_block_size( &ctx ) );
+                 mbedtls_cipher_get_block_size( &ctx ) );
     TEST_ASSERT( unhexify( result, hex_result ) ==
-                 (int) mbedtls_cipher_get_block_size( &ctx ) );
+                 mbedtls_cipher_get_block_size( &ctx ) );
 
-    TEST_ASSERT( 0 == mbedtls_cipher_setkey( &ctx, key, 8 * key_len, operation ) );
+    TEST_ASSERT( 0 == mbedtls_cipher_setkey( &ctx, key, 8 * (int) key_len, operation ) );
 
     TEST_ASSERT( 0 == mbedtls_cipher_update( &ctx, input,
                                      mbedtls_cipher_get_block_size( &ctx ),

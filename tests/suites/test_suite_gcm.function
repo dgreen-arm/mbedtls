@@ -23,7 +23,7 @@ void gcm_bad_parameters( int cipher_id, int direction,
     unsigned char tag_output[16];
     mbedtls_gcm_context ctx;
     unsigned int key_len;
-    size_t pt_len, iv_len, add_len, tag_len = tag_len_bits / 8;
+    size_t pt_len, iv_len, add_len, tag_len = (size_t) tag_len_bits / 8;
 
     mbedtls_gcm_init( &ctx );
 
@@ -66,8 +66,8 @@ void gcm_encrypt_and_tag( int cipher_id,
     unsigned char output[128];
     unsigned char tag_output[16];
     mbedtls_gcm_context ctx;
-    unsigned int key_len;
-    size_t pt_len, iv_len, add_len, tag_len = tag_len_bits / 8;
+    unsigned int key_len, pt_len, tag_len = (unsigned int) tag_len_bits / 8;
+    size_t iv_len, add_len;
 
     mbedtls_gcm_init( &ctx );
 
@@ -116,8 +116,8 @@ void gcm_decrypt_and_verify( int cipher_id,
     unsigned char tag_str[128];
     unsigned char output[128];
     mbedtls_gcm_context ctx;
-    unsigned int key_len;
-    size_t pt_len, iv_len, add_len, tag_len = tag_len_bits / 8;
+    unsigned int key_len, pt_len;
+    size_t iv_len, add_len, tag_len = (size_t) tag_len_bits / 8;
     int ret;
 
     mbedtls_gcm_init( &ctx );

@@ -171,7 +171,7 @@ int mbedtls_x509write_csr_der( mbedtls_x509write_csr *ctx, unsigned char *buf, s
                                                     MBEDTLS_ASN1_CONTEXT_SPECIFIC ) );
 
     MBEDTLS_ASN1_CHK_ADD( pub_len, mbedtls_pk_write_pubkey_der( ctx->key,
-                                                tmp_buf, c - tmp_buf ) );
+                                                tmp_buf, (size_t) ( c - tmp_buf ) ) );
     c -= pub_len;
     len += pub_len;
 
@@ -247,7 +247,7 @@ int mbedtls_x509write_csr_pem( mbedtls_x509write_csr *ctx, unsigned char *buf, s
 
     if( ( ret = mbedtls_pem_write_buffer( PEM_BEGIN_CSR, PEM_END_CSR,
                                   output_buf + sizeof(output_buf) - ret,
-                                  ret, buf, size, &olen ) ) != 0 )
+                                  (size_t) ret, buf, size, &olen ) ) != 0 )
     {
         return( ret );
     }

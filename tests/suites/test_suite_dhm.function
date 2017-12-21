@@ -38,8 +38,8 @@ void dhm_do_dhm( int radix_P, char *input_P,
      */
     TEST_ASSERT( mbedtls_mpi_read_string( &ctx_srv.P, radix_P, input_P ) == 0 );
     TEST_ASSERT( mbedtls_mpi_read_string( &ctx_srv.G, radix_G, input_G ) == 0 );
-    x_size = mbedtls_mpi_size( &ctx_srv.P );
-    pub_cli_len = x_size;
+    x_size = (int) mbedtls_mpi_size( &ctx_srv.P );
+    pub_cli_len = (size_t) x_size;
 
     /*
      * First key exchange

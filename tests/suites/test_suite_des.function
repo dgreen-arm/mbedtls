@@ -90,7 +90,7 @@ void des_encrypt_cbc( char *hex_key_string, char *hex_iv_string,
     unsigned char dst_str[100];
     unsigned char output[100];
     mbedtls_des_context ctx;
-    int src_len;
+    unsigned int src_len;
 
     memset(key_str, 0x00, 100);
     memset(iv_str, 0x00, 100);
@@ -127,7 +127,7 @@ void des_decrypt_cbc( char *hex_key_string, char *hex_iv_string,
     unsigned char dst_str[100];
     unsigned char output[100];
     mbedtls_des_context ctx;
-    int src_len;
+    unsigned int src_len;
 
     memset(key_str, 0x00, 100);
     memset(iv_str, 0x00, 100);
@@ -237,7 +237,7 @@ void des3_encrypt_cbc( int key_count, char *hex_key_string,
     unsigned char dst_str[100];
     unsigned char output[100];
     mbedtls_des3_context ctx;
-    int src_len;
+    unsigned int src_len;
 
     memset(key_str, 0x00, 100);
     memset(iv_str, 0x00, 100);
@@ -282,7 +282,7 @@ void des3_decrypt_cbc( int key_count, char *hex_key_string,
     unsigned char dst_str[100];
     unsigned char output[100];
     mbedtls_des3_context ctx;
-    int src_len;
+    unsigned int src_len;
 
     memset(key_str, 0x00, 100);
     memset(iv_str, 0x00, 100);
@@ -319,8 +319,8 @@ exit:
 /* BEGIN_CASE */
 void des_key_parity_run()
 {
-    int i, j, cnt;
-    unsigned char key[MBEDTLS_DES_KEY_SIZE];
+    int i, j;
+    unsigned char cnt, key[MBEDTLS_DES_KEY_SIZE];
     unsigned int parity;
 
     memset( key, 0, MBEDTLS_DES_KEY_SIZE );

@@ -15,7 +15,7 @@ void mbedtls_arc4_crypt( char *hex_src_string, char *hex_key_string,
     unsigned char key_str[1000];
     unsigned char dst_str[1000];
     unsigned char dst_hexstr[2000];
-    int src_len, key_len;
+    unsigned int src_len, key_len;
     mbedtls_arc4_context ctx;
 
     memset(src_str, 0x00, 1000);

@@ -80,7 +80,7 @@ static int dhm_read_bignum( mbedtls_mpi *X,
     if( (int)( end - *p ) < n )
         return( MBEDTLS_ERR_DHM_BAD_INPUT_DATA );
 
-    if( ( ret = mbedtls_mpi_read_binary( X, *p, n ) ) != 0 )
+    if( ( ret = mbedtls_mpi_read_binary( X, *p, (size_t) n ) ) != 0 )
         return( MBEDTLS_ERR_DHM_READ_PARAMS_FAILED + ret );
 
     (*p) += n;
@@ -157,7 +157,7 @@ int mbedtls_dhm_make_params( mbedtls_dhm_context *ctx, int x_size,
     size_t n1, n2, n3;
     unsigned char *p;
 
-    if( mbedtls_mpi_cmp_int( &ctx->P, 0 ) == 0 )
+    if( mbedtls_mpi_cmp_int( &ctx->P, 0 ) == 0 || x_size < 0 )
         return( MBEDTLS_ERR_DHM_BAD_INPUT_DATA );
 
     /*
@@ -165,7 +165,7 @@ int mbedtls_dhm_make_params( mbedtls_dhm_context *ctx, int x_size,
      */
     do
     {
-        MBEDTLS_MPI_CHK( mbedtls_mpi_fill_random( &ctx->X, x_size, f_rng, p_rng ) );
+        MBEDTLS_MPI_CHK( mbedtls_mpi_fill_random( &ctx->X, (size_t) x_size, f_rng, p_rng ) );
 
         while( mbedtls_mpi_cmp_mpi( &ctx->X, &ctx->P ) >= 0 )
             MBEDTLS_MPI_CHK( mbedtls_mpi_shift_r( &ctx->X, 1 ) );
@@ -201,7 +201,7 @@ int mbedtls_dhm_make_params( mbedtls_dhm_context *ctx, int x_size,
     DHM_MPI_EXPORT( &ctx->G , n2 );
     DHM_MPI_EXPORT( &ctx->GX, n3 );
 
-    *olen  = p - output;
+    *olen  = (size_t) ( p - output );
 
     ctx->len = n1;
 
@@ -240,7 +240,7 @@ int mbedtls_dhm_make_public( mbedtls_dhm_context *ctx, int x_size,
 {
     int ret, count = 0;
 
-    if( ctx == NULL || olen < 1 || olen > ctx->len )
+    if( ctx == NULL || olen < 1 || olen > ctx->len || x_size < 0 )
         return( MBEDTLS_ERR_DHM_BAD_INPUT_DATA );
 
     if( mbedtls_mpi_cmp_int( &ctx->P, 0 ) == 0 )
@@ -251,7 +251,7 @@ int mbedtls_dhm_make_public( mbedtls_dhm_context *ctx, int x_size,
      */
     do
     {
-        MBEDTLS_MPI_CHK( mbedtls_mpi_fill_random( &ctx->X, x_size, f_rng, p_rng ) );
+        MBEDTLS_MPI_CHK( mbedtls_mpi_fill_random( &ctx->X, (size_t) x_size, f_rng, p_rng ) );
 
         while( mbedtls_mpi_cmp_mpi( &ctx->X, &ctx->P ) >= 0 )
             MBEDTLS_MPI_CHK( mbedtls_mpi_shift_r( &ctx->X, 1 ) );

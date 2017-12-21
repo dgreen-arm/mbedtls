@@ -157,10 +157,10 @@ int mbedtls_ecdh_read_params( mbedtls_ecdh_context *ctx,
 {
     int ret;
 
-    if( ( ret = mbedtls_ecp_tls_read_group( &ctx->grp, buf, end - *buf ) ) != 0 )
+    if( ( ret = mbedtls_ecp_tls_read_group( &ctx->grp, buf, (size_t) ( end - *buf ) ) ) != 0 )
         return( ret );
 
-    if( ( ret = mbedtls_ecp_tls_read_point( &ctx->grp, &ctx->Qp, buf, end - *buf ) )
+    if( ( ret = mbedtls_ecp_tls_read_point( &ctx->grp, &ctx->Qp, buf, (size_t) ( end - *buf ) ) )
                 != 0 )
         return( ret );
 

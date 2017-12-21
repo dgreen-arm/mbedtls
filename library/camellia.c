@@ -342,8 +342,7 @@ void mbedtls_camellia_free( mbedtls_camellia_context *ctx )
 int mbedtls_camellia_setkey_enc( mbedtls_camellia_context *ctx, const unsigned char *key,
                          unsigned int keybits )
 {
-    int idx;
-    size_t i;
+    size_t i, idx;
     uint32_t *RK;
     unsigned char t[64];
     uint32_t SIGMA[6][2];
@@ -368,7 +367,7 @@ int mbedtls_camellia_setkey_enc( mbedtls_camellia_context *ctx, const unsigned c
 
     if( keybits == 192 ) {
         for( i = 0; i < 8; i++ )
-            t[24 + i] = ~t[16 + i];
+            t[24 + i] = (unsigned char) ~t[16 + i];
     }
 
     /*
@@ -447,8 +446,7 @@ int mbedtls_camellia_setkey_enc( mbedtls_camellia_context *ctx, const unsigned c
 int mbedtls_camellia_setkey_dec( mbedtls_camellia_context *ctx, const unsigned char *key,
                          unsigned int keybits )
 {
-    int idx, ret;
-    size_t i;
+    int i, idx, ret;
     mbedtls_camellia_context cty;
     uint32_t *RK;
     uint32_t *SK;
@@ -884,7 +882,7 @@ static const unsigned char camellia_test_ctr_ct[3][48] =
       0xDF, 0x50, 0x86, 0x96 }
 };
 
-static const int camellia_test_ctr_len[3] =
+static const size_t camellia_test_ctr_len[3] =
     { 16, 32, 36 };
 #endif /* MBEDTLS_CIPHER_MODE_CTR */
 
@@ -893,7 +891,8 @@ static const int camellia_test_ctr_len[3] =
  */
 int mbedtls_camellia_self_test( int verbose )
 {
-    int i, j, u, v;
+    int v;
+    unsigned int i, j, u;
     unsigned char key[32];
     unsigned char buf[64];
     unsigned char src[16];

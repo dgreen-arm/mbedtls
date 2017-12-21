@@ -175,7 +175,7 @@ int mbedtls_pkcs5_pbes2( const mbedtls_asn1_buf *pbe_params, int mode,
      * The value of keylen from pkcs5_parse_pbkdf2_params() is ignored
      * since it is optional and we don't know if it was set or not
      */
-    keylen = cipher_info->key_bitlen / 8;
+    keylen = (int) cipher_info->key_bitlen / 8;
 
     if( enc_scheme_params.tag != MBEDTLS_ASN1_OCTET_STRING ||
         enc_scheme_params.len != cipher_info->iv_size )
@@ -192,7 +192,7 @@ int mbedtls_pkcs5_pbes2( const mbedtls_asn1_buf *pbe_params, int mode,
         goto exit;
 
     if( ( ret = mbedtls_pkcs5_pbkdf2_hmac( &md_ctx, pwd, pwdlen, salt.p, salt.len,
-                                   iterations, keylen, key ) ) != 0 )
+                                   (unsigned int) iterations, (uint32_t) keylen, key ) ) != 0 )
     {
         goto exit;
     }

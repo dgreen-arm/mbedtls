@@ -36,7 +36,8 @@ void hmac_drbg_entropy_usage( int md_alg )
     const mbedtls_md_info_t *md_info;
     mbedtls_hmac_drbg_context ctx;
     entropy_ctx entropy;
-    size_t last_len, i, reps = 10;
+    size_t last_len;
+    int i, reps = 10;
 
     mbedtls_hmac_drbg_init( &ctx );
     memset( buf, 0, sizeof( buf ) );
@@ -96,12 +97,12 @@ void hmac_drbg_entropy_usage( int md_alg )
     mbedtls_hmac_drbg_set_entropy_len( &ctx, 42 );
     last_len = entropy.len;
     TEST_ASSERT( mbedtls_hmac_drbg_random( &ctx, out, sizeof( out ) ) == 0 );
-    TEST_ASSERT( (int) last_len - entropy.len == 42 );
+    TEST_ASSERT( last_len - entropy.len == 42 );
 
     mbedtls_hmac_drbg_set_entropy_len( &ctx, 13 );
     last_len = entropy.len;
     TEST_ASSERT( mbedtls_hmac_drbg_random( &ctx, out, sizeof( out ) ) == 0 );
-    TEST_ASSERT( (int) last_len - entropy.len == 13 );
+    TEST_ASSERT( last_len - entropy.len == 13 );
 
 exit:
     mbedtls_hmac_drbg_free( &ctx );

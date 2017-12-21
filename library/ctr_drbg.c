@@ -146,10 +146,10 @@ static int block_cipher_df( unsigned char *output,
     unsigned char tmp[MBEDTLS_CTR_DRBG_SEEDLEN];
     unsigned char key[MBEDTLS_CTR_DRBG_KEYSIZE];
     unsigned char chain[MBEDTLS_CTR_DRBG_BLOCKSIZE];
-    unsigned char *p, *iv;
+    unsigned char i, *p, *iv;
     mbedtls_aes_context aes_ctx;
 
-    int i, j;
+    int j;
     size_t buf_len, use_len;
 
     if( data_len > MBEDTLS_CTR_DRBG_MAX_SEED_INPUT )

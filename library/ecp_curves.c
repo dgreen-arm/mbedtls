@@ -905,12 +905,12 @@ cleanup:
 static inline void add32( uint32_t *dst, uint32_t src, signed char *carry )
 {
     *dst += src;
-    *carry += ( *dst < src );
+    *carry = (signed char) ( *carry + ( *dst < src ) );
 }
 
 static inline void sub32( uint32_t *dst, uint32_t src, signed char *carry )
 {
-    *carry -= ( *dst < src );
+    *carry = (signed char) ( *carry - ( *dst < src ) );
     *dst -= src;
 }
 
@@ -941,13 +941,13 @@ static inline void sub32( uint32_t *dst, uint32_t src, signed char *carry )
     STORE32; i++; LOAD32;       \
     cc = c; c = 0;              \
     if( cc < 0 )                \
-        sub32( &cur, -cc, &c ); \
+        sub32( &cur, (uint32_t) -cc, &c ); \
     else                        \
-        add32( &cur, cc, &c );  \
+        add32( &cur, (uint32_t) cc, &c );  \
 
 #define LAST                                    \
     STORE32; i++;                               \
-    cur = c > 0 ? c : 0; STORE32;               \
+    cur = (uint32_t) ( c > 0 ? c : 0 ); STORE32;               \
     cur = 0; while( ++i < MAX32 ) { STORE32; }  \
     if( c < 0 ) fix_negative( N, c, &C, bits );
 

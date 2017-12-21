@@ -126,7 +126,7 @@ void pk_rsa_verify_test_vec( char *message_hex_string, int digest,
     unsigned char result_str[1000];
     mbedtls_rsa_context *rsa;
     mbedtls_pk_context pk;
-    int msg_len;
+    unsigned int msg_len;
 
     mbedtls_pk_init( &pk );
 
@@ -137,7 +137,7 @@ void pk_rsa_verify_test_vec( char *message_hex_string, int digest,
     TEST_ASSERT( mbedtls_pk_setup( &pk, mbedtls_pk_info_from_type( MBEDTLS_PK_RSA ) ) == 0 );
     rsa = mbedtls_pk_rsa( pk );
 
-    rsa->len = mod / 8;
+    rsa->len = (size_t) mod / 8;
     TEST_ASSERT( mbedtls_mpi_read_string( &rsa->N, radix_N, input_N ) == 0 );
     TEST_ASSERT( mbedtls_mpi_read_string( &rsa->E, radix_E, input_E ) == 0 );
 
@@ -169,7 +169,7 @@ void pk_rsa_verify_ext_test_vec( char *message_hex_string, int digest,
     mbedtls_pk_context pk;
     mbedtls_pk_rsassa_pss_options pss_opts;
     void *options;
-    int msg_len;
+    unsigned int msg_len;
     size_t hash_len;
 
     mbedtls_pk_init( &pk );
@@ -181,7 +181,7 @@ void pk_rsa_verify_ext_test_vec( char *message_hex_string, int digest,
     TEST_ASSERT( mbedtls_pk_setup( &pk, mbedtls_pk_info_from_type( MBEDTLS_PK_RSA ) ) == 0 );
     rsa = mbedtls_pk_rsa( pk );
 
-    rsa->len = mod / 8;
+    rsa->len = (size_t) mod / 8;
     TEST_ASSERT( mbedtls_mpi_read_string( &rsa->N, radix_N, input_N ) == 0 );
     TEST_ASSERT( mbedtls_mpi_read_string( &rsa->E, radix_E, input_E ) == 0 );
 
@@ -305,7 +305,7 @@ void pk_rsa_encrypt_test_vec( char *message_hex, int mod,
     TEST_ASSERT( mbedtls_pk_setup( &pk, mbedtls_pk_info_from_type( MBEDTLS_PK_RSA ) ) == 0 );
     rsa = mbedtls_pk_rsa( pk );
 
-    rsa->len = mod / 8;
+    rsa->len = (size_t) mod / 8;
     TEST_ASSERT( mbedtls_mpi_read_string( &rsa->N, radix_N, input_N ) == 0 );
     TEST_ASSERT( mbedtls_mpi_read_string( &rsa->E, radix_E, input_E ) == 0 );
 
@@ -352,7 +352,7 @@ void pk_rsa_decrypt_test_vec( char *cipher_hex, int mod,
     rsa = mbedtls_pk_rsa( pk );
 
     /* load public key */
-    rsa->len = mod / 8;
+    rsa->len = (size_t) mod / 8;
     TEST_ASSERT( mbedtls_mpi_read_string( &rsa->N, radix_N, input_N ) == 0 );
     TEST_ASSERT( mbedtls_mpi_read_string( &rsa->E, radix_E, input_E ) == 0 );
 

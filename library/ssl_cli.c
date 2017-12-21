@@ -305,8 +305,8 @@ static void ssl_write_supported_elliptic_curves_ext( mbedtls_ssl_context *ssl,
 #if defined(MBEDTLS_ECP_C)
         info = mbedtls_ecp_curve_info_from_grp_id( *grp_id );
 #endif
-        elliptic_curve_list[elliptic_curve_len++] = info->tls_id >> 8;
-        elliptic_curve_list[elliptic_curve_len++] = info->tls_id & 0xFF;
+        elliptic_curve_list[elliptic_curve_len++] = (unsigned char) ( info->tls_id >> 8 );
+        elliptic_curve_list[elliptic_curve_len++] = (unsigned char) ( info->tls_id & 0xFF );
     }
 
     if( elliptic_curve_len == 0 )
@@ -630,7 +630,7 @@ static void ssl_write_alpn_ext( mbedtls_ssl_context *ssl,
     MBEDTLS_SSL_DEBUG_MSG( 3, ( "client hello, adding alpn extension" ) );
 
     for( cur = ssl->conf->alpn_list; *cur != NULL; cur++ )
-        alpnlen += (unsigned char)( strlen( *cur ) & 0xFF ) + 1;
+        alpnlen += (size_t) ( ( strlen( *cur ) & 0xFF ) + 1 );
 
     if( end < p || (size_t)( end - p ) < 6 + alpnlen )
     {
@@ -659,7 +659,7 @@ static void ssl_write_alpn_ext( mbedtls_ssl_context *ssl,
         p += 1 + *p;
     }
 
-    *olen = p - buf;
+    *olen = (size_t) ( p - buf );
 
     /* List length = olen - 2 (ext_type) - 2 (ext_len) - 2 (list_len) */
     buf[4] = (unsigned char)( ( ( *olen - 6 ) >> 8 ) & 0xFF );
@@ -1039,7 +1039,7 @@ static int ssl_write_client_hello( mbedtls_ssl_context *ssl )
         p += ext_len;
     }
 
-    ssl->out_msglen  = p - buf;
+    ssl->out_msglen  = (size_t) ( p - buf );
     ssl->out_msgtype = MBEDTLS_SSL_MSG_HANDSHAKE;
     ssl->out_msg[0]  = MBEDTLS_SSL_HS_CLIENT_HELLO;
 
@@ -1324,7 +1324,7 @@ static int ssl_parse_alpn_ext( mbedtls_ssl_context *ssl,
         return( MBEDTLS_ERR_SSL_BAD_HS_SERVER_HELLO );
     }
 
-    list_len = ( buf[0] << 8 ) | buf[1];
+    list_len = (size_t) ( ( buf[0] << 8 ) | buf[1] );
     if( list_len != len - 2 )
     {
         mbedtls_ssl_send_alert_message( ssl, MBEDTLS_SSL_ALERT_LEVEL_FATAL,
@@ -1572,7 +1572,7 @@ static int ssl_parse_server_hello( mbedtls_ssl_context *ssl )
 
     if( ssl->in_hslen > mbedtls_ssl_hs_hdr_len( ssl ) + 39 + n )
     {
-        ext_len = ( ( buf[38 + n] <<  8 )
+        ext_len = (size_t) ( ( buf[38 + n] <<  8 )
                   | ( buf[39 + n]       ) );
 
         if( ( ext_len > 0 && ext_len < 4 ) ||
@@ -1737,9 +1737,9 @@ static int ssl_parse_server_hello( mbedtls_ssl_context *ssl )
 
     while( ext_len )
     {
-        unsigned int ext_id   = ( ( ext[0] <<  8 )
+        unsigned int ext_id   = (unsigned int) ( ( ext[0] <<  8 )
                                 | ( ext[1]       ) );
-        unsigned int ext_size = ( ( ext[2] <<  8 )
+        unsigned int ext_size = (unsigned int) ( ( ext[2] <<  8 )
                                 | ( ext[3]       ) );
 
         if( ext_size + 4 > ext_len )
@@ -2052,7 +2052,7 @@ static int ssl_parse_server_psk_hint( mbedtls_ssl_context *ssl,
      *
      * opaque psk_identity_hint<0..2^16-1>;
      */
-    len = (*p)[0] << 8 | (*p)[1];
+    len = (size_t) ( (*p)[0] << 8 | (*p)[1] );
     *p += 2;
 
     if( (*p) + len > end )
@@ -2337,7 +2337,7 @@ static int ssl_parse_server_key_exchange( mbedtls_ssl_context *ssl )
 
     p   = ssl->in_msg + mbedtls_ssl_hs_hdr_len( ssl );
     end = ssl->in_msg + ssl->in_hslen;
-    MBEDTLS_SSL_DEBUG_BUF( 3,   "server key exchange", p, end - p );
+    MBEDTLS_SSL_DEBUG_BUF( 3,   "server key exchange", p, (size_t) ( end - p ) );
 
 #if defined(MBEDTLS_KEY_EXCHANGE__SOME__PSK_ENABLED)
     if( ciphersuite_info->key_exchange == MBEDTLS_KEY_EXCHANGE_PSK ||
@@ -2426,7 +2426,7 @@ static int ssl_parse_server_key_exchange( mbedtls_ssl_context *ssl )
         mbedtls_md_type_t md_alg = MBEDTLS_MD_NONE;
         mbedtls_pk_type_t pk_alg = MBEDTLS_PK_NONE;
         unsigned char *params = ssl->in_msg + mbedtls_ssl_hs_hdr_len( ssl );
-        size_t params_len = p - params;
+        size_t params_len = (size_t) ( p - params );
 
         /*
          * Handle the digitally-signed structure
@@ -2473,7 +2473,7 @@ static int ssl_parse_server_key_exchange( mbedtls_ssl_context *ssl )
         /*
          * Read signature
          */
-        sig_len = ( p[0] << 8 ) | p[1];
+        sig_len = (size_t) ( ( p[0] << 8 ) | p[1] );
         p += 2;
 
         if( end != p + sig_len )
@@ -2718,8 +2718,8 @@ static int ssl_parse_certificate_request( mbedtls_ssl_context *ssl )
 #if defined(MBEDTLS_SSL_PROTO_TLS1_2)
     if( ssl->minor_ver == MBEDTLS_SSL_MINOR_VERSION_3 )
     {
-        size_t sig_alg_len = ( ( buf[mbedtls_ssl_hs_hdr_len( ssl ) + 1 + n] <<  8 )
-                             | ( buf[mbedtls_ssl_hs_hdr_len( ssl ) + 2 + n]       ) );
+        size_t sig_alg_len = (size_t) ( ( buf[mbedtls_ssl_hs_hdr_len( ssl ) + 1 + n] <<  8 )
+                                      | ( buf[mbedtls_ssl_hs_hdr_len( ssl ) + 2 + n]       ) );
 #if defined(MBEDTLS_DEBUG_C)
         unsigned char* sig_alg = buf + mbedtls_ssl_hs_hdr_len( ssl ) + 3 + n;
         size_t i;
@@ -2744,8 +2744,8 @@ static int ssl_parse_certificate_request( mbedtls_ssl_context *ssl )
 #endif /* MBEDTLS_SSL_PROTO_TLS1_2 */
 
     /* certificate_authorities */
-    dn_len = ( ( buf[mbedtls_ssl_hs_hdr_len( ssl ) + 1 + n] <<  8 )
-             | ( buf[mbedtls_ssl_hs_hdr_len( ssl ) + 2 + n]       ) );
+    dn_len = (size_t) ( ( buf[mbedtls_ssl_hs_hdr_len( ssl ) + 1 + n] <<  8 )
+                      | ( buf[mbedtls_ssl_hs_hdr_len( ssl ) + 2 + n]       ) );
 
     n += dn_len;
     if( ssl->in_hslen != mbedtls_ssl_hs_hdr_len( ssl ) + 3 + n )
@@ -2825,7 +2825,7 @@ static int ssl_write_client_key_exchange( mbedtls_ssl_context *ssl )
 
         ret = mbedtls_dhm_make_public( &ssl->handshake->dhm_ctx,
                                 (int) mbedtls_mpi_size( &ssl->handshake->dhm_ctx.P ),
-                               &ssl->out_msg[i], n,
+                                &ssl->out_msg[i], n,
                                 ssl->conf->f_rng, ssl->conf->p_rng );
         if( ret != 0 )
         {
@@ -3293,10 +3293,10 @@ static int ssl_parse_new_session_ticket( mbedtls_ssl_context *ssl )
 
     msg = ssl->in_msg + mbedtls_ssl_hs_hdr_len( ssl );
 
-    lifetime = ( msg[0] << 24 ) | ( msg[1] << 16 ) |
-               ( msg[2] <<  8 ) | ( msg[3]       );
+    lifetime = (uint32_t) ( ( msg[0] << 24 ) | ( msg[1] << 16 ) |
+                            ( msg[2] <<  8 ) | ( msg[3]       ) );
 
-    ticket_len = ( msg[4] << 8 ) | ( msg[5] );
+    ticket_len = (size_t) ( ( msg[4] << 8 ) | ( msg[5] ) );
 
     if( ticket_len + 6 + mbedtls_ssl_hs_hdr_len( ssl ) != ssl->in_hslen )
     {

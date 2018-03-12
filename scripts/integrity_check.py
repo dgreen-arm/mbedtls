@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-
+#
+# This file is part of mbed TLS (https://tls.mbed.org)
+#
+# Copyright (c) 2018, Arm Limited, All Rights Reserved
+#
+# Purpose
+#
 # This script requires python 3. This script checks for undesired changes
 # to the source code, including file permission changes, presence of tabs,
 # non-Unix line endings, trailing whitespace, and TODO comments.

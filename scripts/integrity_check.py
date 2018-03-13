@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# This file is part of mbed TLS (https://tls.mbed.org)
+# This file is part of Mbed TLS (https://tls.mbed.org)
 #
 # Copyright (c) 2018, Arm Limited, All Rights Reserved
 #
@@ -16,6 +16,7 @@ import os
 import argparse
 import logging
 import codecs
+import sys
 
 
 class IssueTracker(object):
@@ -38,8 +39,8 @@ class IssueTracker(object):
         raise NotImplementedError
 
     def check_file_for_issue(self, filepath):
-        with open(filepath, "r") as f:
-            for i, line in enumerate(iter(f.readline, "")):
+        with open(filepath, "rb") as f:
+            for i, line in enumerate(iter(f.readline, b"")):
                 self.check_file_line(filepath, line, i + 1)
 
     def check_file_line(self, filepath, line, line_number):
@@ -80,8 +81,8 @@ class EndOfFileNewlineIssueTracker(IssueTracker):
         self.heading = "Missing newline at end of file:"
 
     def check_file_for_issue(self, filepath):
-        with open(filepath, "r") as f:
-            if not f.read().endswith("\n"):
+        with open(filepath, "rb") as f:
+            if not f.read().endswith(b"\n"):
                 self.files_with_issues[filepath] = None
 
 
@@ -104,7 +105,7 @@ class LineEndingIssueTracker(IssueTracker):
         self.heading = "Non Unix line endings:"
 
     def issue_with_line(self, line):
-        return "\r" in line
+        return b"\r" in line
 
 
 class TrailingWhitespaceIssueTracker(IssueTracker):
@@ -115,7 +116,7 @@ class TrailingWhitespaceIssueTracker(IssueTracker):
         self.files_exemptions = [".md"]
 
     def issue_with_line(self, line):
-        return line.rstrip("\r\n") != line.rstrip()
+        return line.rstrip(b"\r\n") != line.rstrip()
 
 
 class TabIssueTracker(IssueTracker):
@@ -128,7 +129,7 @@ class TabIssueTracker(IssueTracker):
         ]
 
     def issue_with_line(self, line):
-        return "\t" in line
+        return b"\t" in line
 
 
 class TodoIssueTracker(IssueTracker):
@@ -141,7 +142,7 @@ class TodoIssueTracker(IssueTracker):
         ]
 
     def issue_with_line(self, line):
-        return "todo" in line.lower()
+        return b"todo" in line.lower()
 
 
 class IntegrityChecker(object):
@@ -165,7 +166,8 @@ class IntegrityChecker(object):
         ]
 
     def check_repo_path(self):
-        if not __file__ == os.path.join(".", "scripts", "integrity_check.py"):
+        if __file__ not in [os.path.join(".", "scripts", "integrity_check.py"),
+                            os.path.join("scripts", "integrity_check.py")]:
             raise Exception("Must be run from Mbed TLS root")
 
     def setup_logger(self, log_file, level=logging.INFO):
@@ -190,8 +192,12 @@ class IntegrityChecker(object):
                         issue_to_check.check_file_for_issue(filepath)
 
     def output_issues(self):
+        integrity_return_code = 0
         for issue_to_check in self.issues_to_check:
+            if issue_to_check.files_with_issues:
+                integrity_return_code = 1
             issue_to_check.output_file_issues(self.logger)
+        return integrity_return_code
 
 
 def run_main():
@@ -210,7 +216,8 @@ def run_main():
     check_args = parser.parse_args()
     integrity_check = IntegrityChecker(check_args.log_file)
     integrity_check.check_files()
-    integrity_check.output_issues()
+    return_code = integrity_check.output_issues()
+    sys.exit(return_code)
 
 
 if __name__ == "__main__":

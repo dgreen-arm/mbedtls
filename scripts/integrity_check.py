@@ -8,12 +8,140 @@
 #
 # This script requires python 3. This script checks for undesired changes
 # to the source code, including file permission changes, presence of tabs,
-# non-Unix line endings, trailing whitespace, and TODO comments.
+# non-Unix line endings, trailing whitespace, presence of UTF-8 BOM, and
+# TODO comments.
 # Note: must be run from Mbed TLS root.
 
 import os
 import argparse
 import logging
+import codecs
+
+
+class IssueTracker(object):
+    """Base class for issue tracking. Issues should inherit from this and
+    overwrite either issue_with_line if they check the file line by line, or
+    overwrite check_file_for_issue if they check the file as a whole."""
+
+    def __init__(self):
+        self.heading = ""
+        self.files_exemptions = []
+        self.files_with_issues = {}
+
+    def should_check_file(self, filepath):
+        for files_exemption in self.files_exemptions:
+            if filepath.endswith(files_exemption):
+                return False
+        return True
+
+    def issue_with_line(self, line):
+        raise NotImplementedError
+
+    def check_file_for_issue(self, filepath):
+        with open(filepath, "r") as f:
+            for i, line in enumerate(iter(f.readline, "")):
+                self.check_file_line(filepath, line, i + 1)
+
+    def check_file_line(self, filepath, line, line_number):
+        if self.issue_with_line(line):
+            if filepath not in self.files_with_issues.keys():
+                self.files_with_issues[filepath] = []
+            self.files_with_issues[filepath].append(line_number)
+
+    def output_file_issues(self, logger):
+        if self.files_with_issues.values():
+            logger.info(self.heading)
+            for filename, lines in sorted(self.files_with_issues.items()):
+                if lines:
+                    logger.info("{}: {}".format(
+                        filename, ", ".join(str(x) for x in lines)
+                    ))
+                else:
+                    logger.info(filename)
+            logger.info("")
+
+
+class PermissionIssueTracker(IssueTracker):
+
+    def __init__(self):
+        super().__init__()
+        self.heading = "Incorrect permissions:"
+
+    def check_file_for_issue(self, filepath):
+        if not (os.access(filepath, os.X_OK) ==
+                filepath.endswith((".sh", ".pl", ".py"))):
+            self.files_with_issues[filepath] = None
+
+
+class EndOfFileNewlineIssueTracker(IssueTracker):
+
+    def __init__(self):
+        super().__init__()
+        self.heading = "Missing newline at end of file:"
+
+    def check_file_for_issue(self, filepath):
+        with open(filepath, "r") as f:
+            if not f.read().endswith("\n"):
+                self.files_with_issues[filepath] = None
+
+
+class Utf8BomIssueTracker(IssueTracker):
+
+    def __init__(self):
+        super().__init__()
+        self.heading = "UTF-8 BOM present:"
+
+    def check_file_for_issue(self, filepath):
+        with open(filepath, "rb") as f:
+            if f.read().startswith(codecs.BOM_UTF8):
+                self.files_with_issues[filepath] = None
+
+
+class LineEndingIssueTracker(IssueTracker):
+
+    def __init__(self):
+        super().__init__()
+        self.heading = "Non Unix line endings:"
+
+    def issue_with_line(self, line):
+        return "\r" in line
+
+
+class TrailingWhitespaceIssueTracker(IssueTracker):
+
+    def __init__(self):
+        super().__init__()
+        self.heading = "Trailing whitespace:"
+        self.files_exemptions = [".md"]
+
+    def issue_with_line(self, line):
+        return line.rstrip("\r\n") != line.rstrip()
+
+
+class TabIssueTracker(IssueTracker):
+
+    def __init__(self):
+        super().__init__()
+        self.heading = "Tabs present:"
+        self.files_exemptions = [
+            "Makefile", "generate_visualc_files.pl"
+        ]
+
+    def issue_with_line(self, line):
+        return "\t" in line
+
+
+class TodoIssueTracker(IssueTracker):
+
+    def __init__(self):
+        super().__init__()
+        self.heading = "TODO present:"
+        self.files_exemptions = [
+            __file__, "benchmark.c", "pull_request_template.md"
+        ]
+
+    def issue_with_line(self, line):
+        return "todo" in line.lower()
 
 
 class IntegrityChecker(object):
@@ -22,25 +150,19 @@ class IntegrityChecker(object):
         self.check_repo_path()
         self.logger = None
         self.setup_logger(log_file)
-        self.source_files_to_check = (
-            ".c", ".h", ".function", ".data",
-            ".md", "Makefile", "CMakeLists.txt"
+        self.files_to_check = (
+            ".c", ".h", ".sh", ".pl", ".py", ".md", ".function", ".data",
+            "Makefile", "CMakeLists.txt", "ChangeLog"
         )
-        self.script_file_types = (".sh", ".pl", ".py")
-        self.permission_issues = []
-        self.end_of_file_newline_issues = []
-        self.line_ending_issues = {
-            "report_heading": "Non Unix line endings:", "files": {}
-        }
-        self.trailing_whitespace = {
-            "report_heading": "Trailing whitespace:", "files": {}
-        }
-        self.tab_issues = {
-            "report_heading": "Tabs present:", "files": {}
-        }
-        self.todo_issues = {
-            "report_heading": "TODO present:", "files": {}
-        }
+        self.issues_to_check = [
+            PermissionIssueTracker(),
+            EndOfFileNewlineIssueTracker(),
+            Utf8BomIssueTracker(),
+            LineEndingIssueTracker(),
+            TrailingWhitespaceIssueTracker(),
+            TabIssueTracker(),
+            TodoIssueTracker(),
+        ]
 
     def check_repo_path(self):
         if not __file__ == os.path.join(".", "scripts", "integrity_check.py"):
@@ -56,67 +178,20 @@ class IntegrityChecker(object):
             console = logging.StreamHandler()
             self.logger.addHandler(console)
 
-    def check_file_permissions(self, filepath):
-        if not (os.access(filepath, os.X_OK) ==
-                filepath.endswith(self.script_file_types)):
-            self.permission_issues.append(filepath)
-
-    def check_file_content(self, filepath):
-        with open(filepath, "r") as f:
-            self.line_ending_issues["files"][filepath] = []
-            self.trailing_whitespace["files"][filepath] = []
-            self.tab_issues["files"][filepath] = []
-            self.todo_issues["files"][filepath] = []
-            allow_trailing_whitespace = filepath.endswith(".md")
-            allow_tabs = filepath.endswith("Makefile")
-            line = None
-            for i, line in enumerate(iter(f.readline, "")):
-                if "\r" in line:
-                    self.line_ending_issues["files"][filepath].append(i + 1)
-                if (not allow_trailing_whitespace and
-                        line.rstrip("\r\n") != line.rstrip()):
-                    self.trailing_whitespace["files"][filepath].append(i + 1)
-                if not allow_tabs and "\t" in line:
-                    self.tab_issues["files"][filepath].append(i + 1)
-                if "TODO" in line:
-                    self.todo_issues["files"][filepath].append(i + 1)
-            if line is not None and not line.endswith("\n"):
-                self.end_of_file_newline_issues.append(filepath)
-
     def check_files(self):
         for root, dirs, files in sorted(os.walk(".")):
-            for filepath in sorted(files):
-                absolute_filepath = os.path.join(root, filepath)
-                if os.path.join("yotta", "module") in absolute_filepath:
+            for filename in sorted(files):
+                filepath = os.path.join(root, filename)
+                if (os.path.join("yotta", "module") in filepath or
+                        not filepath.endswith(self.files_to_check)):
                     continue
-                self.check_file_permissions(absolute_filepath)
-                if not filepath.endswith(self.source_files_to_check):
-                    continue
-                self.check_file_content(absolute_filepath)
+                for issue_to_check in self.issues_to_check:
+                    if issue_to_check.should_check_file(filepath):
+                        issue_to_check.check_file_for_issue(filepath)
 
     def output_issues(self):
-        if self.permission_issues:
-            self.logger.info("Incorrect file permissions:")
-            for issue in self.permission_issues:
-                self.logger.info(issue)
-            self.logger.info("")
-        if self.end_of_file_newline_issues:
-            self.logger.info("Missing newline at end of file:")
-            for issue in self.end_of_file_newline_issues:
-                self.logger.info(issue)
-            self.logger.info("")
-        for category in [self.line_ending_issues,
-                         self.trailing_whitespace,
-                         self.tab_issues,
-                         self.todo_issues]:
-            if any(category["files"].values()):
-                self.logger.info(category["report_heading"])
-                for filename, lines in sorted(category["files"].items()):
-                    if lines:
-                        self.logger.info("{}: {}".format(
-                            filename, ", ".join(str(x) for x in lines)
-                        ))
-                self.logger.info("")
+        for issue_to_check in self.issues_to_check:
+            issue_to_check.output_file_issues(self.logger)
 
 
 def run_main():
@@ -124,7 +199,8 @@ def run_main():
         description=(
             "This script checks for undesired changes to the source code, "
             "including file permission changes, presence of tabs, "
-            "non-Unix line endings, trailing whitespace, and TODO comments. "
+            "non-Unix line endings, trailing whitespace, "
+            "presence of UTF-8 BOM, and TODO comments. "
             "Note: must be run from Mbed TLS root."
         )
     )

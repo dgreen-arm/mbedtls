@@ -166,8 +166,9 @@ class IntegrityChecker(object):
         ]
 
     def check_repo_path(self):
-        if __file__ not in [os.path.join(".", "scripts", "integrity_check.py"),
-                            os.path.join("scripts", "integrity_check.py")]:
+        current_dir = os.path.realpath('.')
+        root_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        if current_dir != root_dir:
             raise Exception("Must be run from Mbed TLS root")
 
     def setup_logger(self, log_file, level=logging.INFO):

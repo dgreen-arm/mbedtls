@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-#
-# This file is part of Mbed TLS (https://tls.mbed.org)
-#
-# Copyright (c) 2018, Arm Limited, All Rights Reserved
-#
-# Purpose
-#
-# This script requires python 3. This script checks for undesired changes
-# to the source code, including file permission changes, presence of tabs,
-# non-Unix line endings, trailing whitespace, presence of UTF-8 BOM, and
-# TODO comments.
-# Note: must be run from Mbed TLS root.
+"""
+This file is part of Mbed TLS (https://tls.mbed.org)
+
+Copyright (c) 2018, Arm Limited, All Rights Reserved
+
+Purpose
+
+This script checks the current state of the source code for minor issues,
+including incorrect file permissions, presence of tabs, non-Unix line endings,
+trailing whitespace, presence of UTF-8 BOM, and TODO comments.
+Note: requires python 3, must be run from Mbed TLS root.
+"""
 
 import os
 import argparse
@@ -204,11 +204,11 @@ class IntegrityChecker(object):
 def run_main():
     parser = argparse.ArgumentParser(
         description=(
-            "This script checks for undesired changes to the source code, "
-            "including file permission changes, presence of tabs, "
-            "non-Unix line endings, trailing whitespace, "
+            "This script checks the current state of the source code for "
+            "minor issues, including incorrect file permissions, "
+            "presence of tabs, non-Unix line endings, trailing whitespace, "
             "presence of UTF-8 BOM, and TODO comments. "
-            "Note: must be run from Mbed TLS root."
+            "Note: requires python 3, must be run from Mbed TLS root."
         )
     )
     parser.add_argument(

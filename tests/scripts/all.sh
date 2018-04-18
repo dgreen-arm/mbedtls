@@ -458,9 +458,9 @@ tests/scripts/check-generated-files.sh
 msg "test: doxygen markup outside doxygen blocks" # < 1s
 tests/scripts/check-doxy-blocks.pl
 
-msg "test: code integrity check" # < 1s
+msg "test: check-files.py" # < 1s
 cleanup
-scripts/integrity_check.py
+scripts/check-files.py
 
 msg "test/build: declared and exported names" # < 3s
 cleanup

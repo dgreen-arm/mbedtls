@@ -27,7 +27,12 @@ import tempfile
 
 class AbiChecker(object):
 
-    def __init__(self, report_dir, old_rev, new_rev, keep_all_reports):
+    def __init__(self,
+                 report_dir,
+                 old_rev,
+                 new_rev,
+                 keep_all_reports,
+                 exclude_internal):
         self.repo_path = "."
         self.log = None
         self.setup_logger()
@@ -35,6 +40,8 @@ class AbiChecker(object):
         self.return_code = 0
         self.report_dir = os.path.abspath(report_dir)
         self.keep_all_reports = keep_all_reports
+        self.exclude_internal = exclude_internal
+        self.internal_headers_file = None
         self.should_keep_report_dir = os.path.isdir(self.report_dir)
         self.old_rev = old_rev
         self.new_rev = new_rev
@@ -157,6 +164,12 @@ class AbiChecker(object):
                 "-strict",
                 "-report-path", output_path
             ]
+            if self.exclude_internal:
+                self.internal_headers_file = tempfile.mkstemp()[1]
+                with open(self.internal_headers_file, "w") as ih_file:
+                    ih_file.write(".*_internal.h")
+                abi_compliance_command.append("-skip-headers")
+                abi_compliance_command.append(self.internal_headers_file)
             abi_compliance_process = subprocess.Popen(
                 abi_compliance_command,
                 stdout=subprocess.PIPE,
@@ -190,6 +203,8 @@ class AbiChecker(object):
                 os.remove(self.new_dumps[mbed_module])
             if not self.should_keep_report_dir and not self.keep_all_reports:
                 os.rmdir(self.report_dir)
+            if self.exclude_internal:
+                os.remove(self.internal_headers_file)
         except Exception:
             traceback.print_exc()
 
@@ -231,6 +246,10 @@ def run_main():
         help="keep all reports, even if there are no compatibility issues",
     )
     parser.add_argument(
+        "-i", "--exclude-internal", action="store_true",
+        help="exclude internal files from compatibility checking",
+    )
+    parser.add_argument(
         "-o", "--old-rev", type=str, help="revision for old version",
         required=True
     )
@@ -242,6 +261,7 @@ def run_main():
     abi_check = AbiChecker(
         abi_args.report_dir, abi_args.old_rev,
         abi_args.new_rev, abi_args.keep_all_reports,
+        abi_args.exclude_internal
     )
     abi_check.check_for_abi_changes()
 

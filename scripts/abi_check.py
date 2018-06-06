@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 This file is part of Mbed TLS (https://tls.mbed.org)
 
@@ -66,7 +66,8 @@ class AbiChecker(object):
 
     def check_abi_tools_are_installed(self):
         for command in ["abi-dumper", "abi-compliance-checker"]:
-            if not shutil.which(command):
+            if not any(os.access(os.path.join(path, command), os.X_OK) for path
+                       in os.environ["PATH"].split(os.pathsep)):
                 raise Exception("{} not installed, aborting".format(command))
 
     def get_clean_worktree_for_git_revision(self, git_rev):

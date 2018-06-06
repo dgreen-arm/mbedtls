@@ -31,6 +31,8 @@ class AbiChecker(object):
         self.repo_path = "."
         self.log = None
         self.setup_logger()
+        self.compatibility_report = ""
+        self.return_code = 0
         self.report_dir = os.path.abspath(report_dir)
         self.keep_all_reports = keep_all_reports
         self.should_keep_report_dir = os.path.isdir(self.report_dir)
@@ -41,6 +43,10 @@ class AbiChecker(object):
         self.new_dumps = {}
         self.git_command = "git"
         self.make_command = "make"
+
+    def set_return_code(self, return_code):
+        if return_code > self.return_code:
+            self.return_code = return_code
 
     def check_repo_path(self):
         if not all(os.path.isdir(d) for d in ["include", "library", "tests"]):
@@ -137,8 +143,6 @@ class AbiChecker(object):
         return abi_dumps
 
     def get_abi_compatibility_report(self):
-        compatibility_report = ""
-        compliance_return_code = 0
         for mbed_module in self.mbedtls_modules:
             output_path = os.path.join(
                 self.report_dir, "{}-{}-{}.html".format(
@@ -161,15 +165,15 @@ class AbiChecker(object):
             abi_compliance_output, _ = abi_compliance_process.communicate()
             self.log.info(abi_compliance_output.decode("utf-8"))
             if abi_compliance_process.returncode == 0:
-                compatibility_report += (
+                self.compatibility_report += (
                     "No compatibility issues for {}\n".format(mbed_module)
                 )
                 if not self.keep_all_reports:
                     os.remove(output_path)
             elif abi_compliance_process.returncode == 1:
-                compliance_return_code = 1
+                self.set_return_code(1)
                 self.should_keep_report_dir = True
-                compatibility_report += (
+                self.compatibility_report += (
                     "Compatibility issues found for {}, "
                     "for details see {}\n".format(mbed_module, output_path)
                 )
@@ -178,61 +182,68 @@ class AbiChecker(object):
                     "abi-compliance-checker failed with a return code of {},"
                     " aborting".format(abi_compliance_process.returncode)
                 )
-            os.remove(self.old_dumps[mbed_module])
-            os.remove(self.new_dumps[mbed_module])
-        if not self.should_keep_report_dir and not self.keep_all_reports:
-            os.rmdir(self.report_dir)
-        self.log.info(compatibility_report)
-        return compliance_return_code
+
+    def cleanup(self):
+        try:
+            for mbed_module in self.mbedtls_modules:
+                os.remove(self.old_dumps[mbed_module])
+                os.remove(self.new_dumps[mbed_module])
+            if not self.should_keep_report_dir and not self.keep_all_reports:
+                os.rmdir(self.report_dir)
+        except Exception:
+            traceback.print_exc()
 
     def check_for_abi_changes(self):
-        self.check_repo_path()
-        self.check_abi_tools_are_installed()
-        self.old_dumps = self.get_abi_dump_for_ref(self.old_rev)
-        self.new_dumps = self.get_abi_dump_for_ref(self.new_rev)
-        return self.get_abi_compatibility_report()
+        try:
+            self.check_repo_path()
+            self.check_abi_tools_are_installed()
+            self.old_dumps = self.get_abi_dump_for_ref(self.old_rev)
+            self.new_dumps = self.get_abi_dump_for_ref(self.new_rev)
+            self.get_abi_compatibility_report()
+        except Exception:
+            traceback.print_exc()
+            self.set_return_code(2)
+        finally:
+            self.log.info(self.compatibility_report)
+            self.cleanup()
+            sys.exit(self.return_code)
 
 
 def run_main():
-    try:
-        parser = argparse.ArgumentParser(
-            description=(
-                """This script is a small wrapper around the
-                abi-compliance-checker and abi-dumper tools, applying them
-                to compare the ABI and API of the library files from two
-                different Git revisions within an Mbed TLS repository.
-                The results of the comparison are formatted as HTML and stored
-                at a configurable location. Returns 0 on success, 1 on ABI/API
-                non-compliance, and 2 if there is an error while running the
-                script. Note: must be run from Mbed TLS root."""
-            )
+    parser = argparse.ArgumentParser(
+        description=(
+            """This script is a small wrapper around the
+            abi-compliance-checker and abi-dumper tools, applying them
+            to compare the ABI and API of the library files from two
+            different Git revisions within an Mbed TLS repository.
+            The results of the comparison are formatted as HTML and stored
+            at a configurable location. Returns 0 on success, 1 on ABI/API
+            non-compliance, and 2 if there is an error while running the
+            script. Note: must be run from Mbed TLS root."""
         )
-        parser.add_argument(
-            "-r", "--report-dir", type=str, default="reports",
-            help="directory where reports are stored, default is reports",
-        )
-        parser.add_argument(
-            "-k", "--keep-all-reports", action="store_true",
-            help="keep all reports, even if there are no compatibility issues",
-        )
-        parser.add_argument(
-            "-o", "--old-rev", type=str, help="revision for old version",
-            required=True
-        )
-        parser.add_argument(
-            "-n", "--new-rev", type=str, help="revision for new version",
-            required=True
-        )
-        abi_args = parser.parse_args()
-        abi_check = AbiChecker(
-            abi_args.report_dir, abi_args.old_rev,
-            abi_args.new_rev, abi_args.keep_all_reports
-        )
-        return_code = abi_check.check_for_abi_changes()
-        sys.exit(return_code)
-    except Exception:
-        traceback.print_exc()
-        sys.exit(2)
+    )
+    parser.add_argument(
+        "-r", "--report-dir", type=str, default="reports",
+        help="directory where reports are stored, default is reports",
+    )
+    parser.add_argument(
+        "-k", "--keep-all-reports", action="store_true",
+        help="keep all reports, even if there are no compatibility issues",
+    )
+    parser.add_argument(
+        "-o", "--old-rev", type=str, help="revision for old version",
+        required=True
+    )
+    parser.add_argument(
+        "-n", "--new-rev", type=str, help="revision for new version",
+        required=True
+    )
+    abi_args = parser.parse_args()
+    abi_check = AbiChecker(
+        abi_args.report_dir, abi_args.old_rev,
+        abi_args.new_rev, abi_args.keep_all_reports,
+    )
+    abi_check.check_for_abi_changes()
 
 
 if __name__ == "__main__":

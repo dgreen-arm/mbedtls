@@ -43,9 +43,7 @@ class AbiChecker(object):
         self.make_command = "make"
 
     def check_repo_path(self):
-        current_dir = os.path.realpath('.')
-        root_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-        if current_dir != root_dir:
+        if not all(os.path.isdir(d) for d in ["include", "library", "tests"]):
             raise Exception("Must be run from Mbed TLS root")
 
     def setup_logger(self):

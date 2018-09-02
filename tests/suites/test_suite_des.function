@@ -94,7 +94,8 @@ void des_decrypt_cbc( data_t *key_str, data_t *iv_str,
 
 
     mbedtls_des_setkey_dec( &ctx, key_str->x );
-    TEST_ASSERT( mbedtls_des_crypt_cbc( &ctx, MBEDTLS_DES_DECRYPT, src_str->len, iv_str->x, src_str->x, output ) == cbc_result );
+    TEST_ASSERT( mbedtls_des_crypt_cbc( &ctx, MBEDTLS_DES_DECRYPT, src_str->len,
+                 iv_str->x, src_str->x, output ) == cbc_result );
     if( cbc_result == 0 )
     {
 
@@ -226,7 +227,7 @@ exit:
 /* END_CASE */
 
 /* BEGIN_CASE */
-void des_key_parity_run(  )
+void des_key_parity_run( )
 {
     int i, j, cnt;
     unsigned char key[MBEDTLS_DES_KEY_SIZE];
@@ -269,7 +270,7 @@ void des_key_parity_run(  )
 /* END_CASE */
 
 /* BEGIN_CASE depends_on:MBEDTLS_SELF_TEST */
-void des_selftest(  )
+void des_selftest( )
 {
     TEST_ASSERT( mbedtls_des_self_test( 1 ) == 0 );
 }

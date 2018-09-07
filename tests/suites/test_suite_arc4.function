@@ -18,7 +18,7 @@ void mbedtls_arc4_crypt( data_t *src_str, data_t *key_str,
     mbedtls_arc4_init( &ctx );
 
 
-    mbedtls_arc4_setup(&ctx, key_str->x, key_str->len);
+    mbedtls_arc4_setup( &ctx, key_str->x, key_str->len );
     TEST_ASSERT( mbedtls_arc4_crypt( &ctx, src_str->len, src_str->x,
                                      dst_str ) == 0 );
 

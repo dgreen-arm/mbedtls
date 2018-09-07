@@ -18,11 +18,11 @@ void xtea_encrypt_ecb( data_t *key_str, data_t *src_str,
 
 
     mbedtls_xtea_setup( &ctx, key_str->x );
-    TEST_ASSERT( mbedtls_xtea_crypt_ecb( &ctx, MBEDTLS_XTEA_ENCRYPT, src_str->x,
-                 output ) == 0 );
+    TEST_ASSERT( mbedtls_xtea_crypt_ecb( &ctx, MBEDTLS_XTEA_ENCRYPT,
+                                         src_str->x, output ) == 0 );
 
-    TEST_ASSERT( memcmp( output, hex_dst_string->x, hex_dst_string->len )
-                 == 0 );
+    TEST_ASSERT( memcmp( output, hex_dst_string->x,
+                         hex_dst_string->len ) == 0 );
 }
 /* END_CASE */
 
@@ -37,11 +37,11 @@ void xtea_decrypt_ecb( data_t *key_str, data_t *src_str,
 
 
     mbedtls_xtea_setup( &ctx, key_str->x );
-    TEST_ASSERT( mbedtls_xtea_crypt_ecb( &ctx, MBEDTLS_XTEA_DECRYPT, src_str->x,
-                 output ) == 0 );
+    TEST_ASSERT( mbedtls_xtea_crypt_ecb( &ctx, MBEDTLS_XTEA_DECRYPT,
+                                         src_str->x, output ) == 0 );
 
-    TEST_ASSERT( memcmp( output, hex_dst_string->x, hex_dst_string->len )
-                 == 0 );
+    TEST_ASSERT( memcmp( output, hex_dst_string->x,
+                         hex_dst_string->len ) == 0 );
 }
 /* END_CASE */
 
@@ -60,7 +60,8 @@ void xtea_encrypt_cbc( data_t *key_str, data_t *iv_str,
                                          src_str->len, iv_str->x,
                                          src_str->x, output ) == 0 );
 
-    TEST_ASSERT( memcmp( output, hex_dst_string->x, hex_dst_string->len ) == 0 );
+    TEST_ASSERT( memcmp( output, hex_dst_string->x,
+                         hex_dst_string->len ) == 0 );
 }
 /* END_CASE */
 
@@ -79,7 +80,8 @@ void xtea_decrypt_cbc( data_t *key_str, data_t *iv_str,
                                          src_str->len, iv_str->x,
                                          src_str->x, output ) == 0 );
 
-    TEST_ASSERT( memcmp( output, hex_dst_string->x, hex_dst_string->len ) == 0 );
+    TEST_ASSERT( memcmp( output, hex_dst_string->x,
+                         hex_dst_string->len ) == 0 );
 }
 /* END_CASE */
 

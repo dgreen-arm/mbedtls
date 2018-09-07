@@ -22,8 +22,8 @@ void camellia_encrypt_ecb( data_t *key_str, data_t *src_str,
                  key_str->len * 8 ) == setkey_result );
     if( setkey_result == 0 )
     {
-        TEST_ASSERT( mbedtls_camellia_crypt_ecb( &ctx, MBEDTLS_CAMELLIA_ENCRYPT,
-                     src_str->x, output ) == 0 );
+        TEST_ASSERT( mbedtls_camellia_crypt_ecb( &ctx,
+                     MBEDTLS_CAMELLIA_ENCRYPT, src_str->x, output ) == 0 );
 
         TEST_ASSERT( memcmp( output, hex_dst_string->x, hex_dst_string->len )
                      == 0 );
@@ -49,8 +49,8 @@ void camellia_decrypt_ecb( data_t *key_str, data_t *src_str,
                  key_str->len * 8 ) == setkey_result );
     if( setkey_result == 0 )
     {
-        TEST_ASSERT( mbedtls_camellia_crypt_ecb( &ctx, MBEDTLS_CAMELLIA_DECRYPT,
-                     src_str->x, output ) == 0 );
+        TEST_ASSERT( mbedtls_camellia_crypt_ecb( &ctx,
+                     MBEDTLS_CAMELLIA_DECRYPT, src_str->x, output ) == 0 );
 
         TEST_ASSERT( memcmp( output, hex_dst_string->x, hex_dst_string->len )
                      == 0 );

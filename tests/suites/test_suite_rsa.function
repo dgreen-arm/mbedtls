@@ -58,7 +58,8 @@ void mbedtls_rsa_pkcs1_sign( data_t *message_str, int padding_mode,
                                          hash_result, output ) == result );
     if( result == 0 )
     {
-        TEST_ASSERT( memcmp( output, result_hex_str->x, result_hex_str->len ) == 0 );
+        TEST_ASSERT( memcmp( output, result_hex_str->x,
+                             result_hex_str->len ) == 0 );
     }
 
 exit:
@@ -140,8 +141,8 @@ void rsa_pkcs1_sign_raw( data_t *hash_result,
                                          hash_result->len, hash_result->x,
                                          output ) == 0 );
 
-
-    TEST_ASSERT( memcmp( output, result_hex_str->x, result_hex_str->len ) == 0 );
+    TEST_ASSERT( memcmp( output, result_hex_str->x,
+                         result_hex_str->len ) == 0 );
 
 #if defined(MBEDTLS_PKCS1_V15)
     /* For PKCS#1 v1.5, there is an alternative way to generate signatures */
@@ -163,8 +164,8 @@ void rsa_pkcs1_sign_raw( data_t *hash_result,
 
         if( res == 0 )
         {
-            TEST_ASSERT( memcmp( output, result_hex_str->x, result_hex_str->len )
-                         == 0 );
+            TEST_ASSERT( memcmp( output, result_hex_str->x,
+                                 result_hex_str->len ) == 0 );
         }
     }
 #endif /* MBEDTLS_PKCS1_V15 */
@@ -272,8 +273,8 @@ void mbedtls_rsa_pkcs1_encrypt( data_t *message_str, int padding_mode,
                                             message_str->x, output ) == result );
     if( result == 0 )
     {
-        TEST_ASSERT( memcmp( output, result_hex_str->x, result_hex_str->len )
-                     == 0 );
+        TEST_ASSERT( memcmp( output, result_hex_str->x,
+                             result_hex_str->len ) == 0 );
     }
 
 exit:
@@ -310,7 +311,8 @@ void rsa_pkcs1_encrypt_bad_rng( data_t *message_str, int padding_mode,
                                             message_str->x, output ) == result );
     if( result == 0 )
     {
-        TEST_ASSERT( memcmp( output, result_hex_str->x, result_hex_str->len ) == 0 );
+        TEST_ASSERT( memcmp( output, result_hex_str->x,
+                             result_hex_str->len ) == 0 );
     }
 
 exit:
@@ -359,8 +361,8 @@ void mbedtls_rsa_pkcs1_decrypt( data_t *message_str, int padding_mode,
                  max_output ) == result );
     if( result == 0 )
     {
-        TEST_ASSERT( memcmp( output, result_hex_str->x, result_hex_str->len )
-                     == 0 );
+        TEST_ASSERT( memcmp( output, result_hex_str->x,
+                             result_hex_str->len ) == 0 );
     }
 
 exit:
@@ -396,9 +398,8 @@ void mbedtls_rsa_public( data_t *message_str, int mod, int radix_N,
     TEST_ASSERT( mbedtls_rsa_public( &ctx, message_str->x, output ) == result );
     if( result == 0 )
     {
-
-        TEST_ASSERT( memcmp( output, result_hex_str->x, result_hex_str->len )
-                     == 0 );
+        TEST_ASSERT( memcmp( output, result_hex_str->x,
+                             result_hex_str->len ) == 0 );
     }
 
     /* And now with the copy */
@@ -412,8 +413,8 @@ void mbedtls_rsa_public( data_t *message_str, int mod, int radix_N,
     TEST_ASSERT( mbedtls_rsa_public( &ctx2, message_str->x, output ) == result );
     if( result == 0 )
     {
-        TEST_ASSERT( memcmp( output, result_hex_str->x, result_hex_str->len )
-                     == 0 );
+        TEST_ASSERT( memcmp( output, result_hex_str->x,
+                             result_hex_str->len ) == 0 );
     }
 
 exit:
@@ -462,8 +463,8 @@ void mbedtls_rsa_private( data_t *message_str, int mod, int radix_P,
                                   message_str->x, output ) == result );
         if( result == 0 )
         {
-            TEST_ASSERT( memcmp( output, result_hex_str->x, result_hex_str->len )
-                         == 0 );
+            TEST_ASSERT( memcmp( output, result_hex_str->x,
+                                 result_hex_str->len ) == 0 );
         }
     }
 
@@ -479,8 +480,8 @@ void mbedtls_rsa_private( data_t *message_str, int mod, int radix_P,
                               message_str->x, output ) == result );
     if( result == 0 )
     {
-        TEST_ASSERT( memcmp( output, result_hex_str->x, result_hex_str->len )
-                     == 0 );
+        TEST_ASSERT( memcmp( output, result_hex_str->x,
+                             result_hex_str->len ) == 0 );
     }
 
 exit:

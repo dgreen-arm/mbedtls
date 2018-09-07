@@ -215,6 +215,7 @@ void ecp_write_binary( int id, char *x, char *y, char *z, int format,
 
     if( ret == 0 )
     {
+        TEST_ASSERT( out->len == olen );
         TEST_ASSERT( memcmp( buf, out->x, out->len ) == 0 );
     }
 

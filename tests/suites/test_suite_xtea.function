@@ -21,6 +21,7 @@ void xtea_encrypt_ecb( data_t *key_str, data_t *src_str,
     TEST_ASSERT( mbedtls_xtea_crypt_ecb( &ctx, MBEDTLS_XTEA_ENCRYPT,
                                          src_str->x, output ) == 0 );
 
+    TEST_ASSERT( hex_dst_string->len == 8 );
     TEST_ASSERT( memcmp( output, hex_dst_string->x,
                          hex_dst_string->len ) == 0 );
 }
@@ -40,6 +41,7 @@ void xtea_decrypt_ecb( data_t *key_str, data_t *src_str,
     TEST_ASSERT( mbedtls_xtea_crypt_ecb( &ctx, MBEDTLS_XTEA_DECRYPT,
                                          src_str->x, output ) == 0 );
 
+    TEST_ASSERT( hex_dst_string->len == 8 );
     TEST_ASSERT( memcmp( output, hex_dst_string->x,
                          hex_dst_string->len ) == 0 );
 }
@@ -60,6 +62,7 @@ void xtea_encrypt_cbc( data_t *key_str, data_t *iv_str,
                                          src_str->len, iv_str->x,
                                          src_str->x, output ) == 0 );
 
+    TEST_ASSERT( hex_dst_string->len == src_str->len );
     TEST_ASSERT( memcmp( output, hex_dst_string->x,
                          hex_dst_string->len ) == 0 );
 }
@@ -80,6 +83,7 @@ void xtea_decrypt_cbc( data_t *key_str, data_t *iv_str,
                                          src_str->len, iv_str->x,
                                          src_str->x, output ) == 0 );
 
+    TEST_ASSERT( hex_dst_string->len == src_str->len );
     TEST_ASSERT( memcmp( output, hex_dst_string->x,
                          hex_dst_string->len ) == 0 );
 }

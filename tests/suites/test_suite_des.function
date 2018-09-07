@@ -28,6 +28,7 @@ void des_encrypt_ecb( data_t *key_str, data_t *src_str,
     mbedtls_des_setkey_enc( &ctx, key_str->x );
     TEST_ASSERT( mbedtls_des_crypt_ecb( &ctx, src_str->x, output ) == 0 );
 
+    TEST_ASSERT( hex_dst_string->len == 8 );
     TEST_ASSERT( memcmp( output, hex_dst_string->x,
                          hex_dst_string->len ) == 0 );
 
@@ -50,6 +51,7 @@ void des_decrypt_ecb( data_t *key_str, data_t *src_str,
     mbedtls_des_setkey_dec( &ctx, key_str->x );
     TEST_ASSERT( mbedtls_des_crypt_ecb( &ctx, src_str->x, output ) == 0 );
 
+    TEST_ASSERT( hex_dst_string->len == 8 );
     TEST_ASSERT( memcmp( output, hex_dst_string->x,
                          hex_dst_string->len ) == 0 );
 
@@ -76,6 +78,7 @@ void des_encrypt_cbc( data_t *key_str, data_t *iv_str,
                                         output ) == cbc_result );
     if( cbc_result == 0 )
     {
+        TEST_ASSERT( hex_dst_string->len == src_str->len );
         TEST_ASSERT( memcmp( output, hex_dst_string->x,
                              hex_dst_string->len ) == 0 );
     }
@@ -103,6 +106,7 @@ void des_decrypt_cbc( data_t *key_str, data_t *iv_str,
                                         output ) == cbc_result );
     if( cbc_result == 0 )
     {
+        TEST_ASSERT( hex_dst_string->len == src_str->len );
         TEST_ASSERT( memcmp( output, hex_dst_string->x,
                      hex_dst_string->len ) == 0 );
     }
@@ -132,6 +136,7 @@ void des3_encrypt_ecb( int key_count, data_t *key_str,
 
     TEST_ASSERT( mbedtls_des3_crypt_ecb( &ctx, src_str->x, output ) == 0 );
 
+    TEST_ASSERT( hex_dst_string->len == 8 );
     TEST_ASSERT( memcmp( output, hex_dst_string->x,
                          hex_dst_string->len ) == 0 );
 
@@ -160,6 +165,7 @@ void des3_decrypt_ecb( int key_count, data_t *key_str,
 
     TEST_ASSERT( mbedtls_des3_crypt_ecb( &ctx, src_str->x, output ) == 0 );
 
+    TEST_ASSERT( hex_dst_string->len == 8 );
     TEST_ASSERT( memcmp( output, hex_dst_string->x,
                          hex_dst_string->len ) == 0 );
 
@@ -193,6 +199,7 @@ void des3_encrypt_cbc( int key_count, data_t *key_str,
 
     if( cbc_result == 0 )
     {
+        TEST_ASSERT( hex_dst_string->len == src_str->len );
         TEST_ASSERT( memcmp( output, hex_dst_string->x,
                              hex_dst_string->len ) == 0 );
     }
@@ -227,6 +234,7 @@ void des3_decrypt_cbc( int key_count, data_t *key_str,
 
     if( cbc_result == 0 )
     {
+        TEST_ASSERT( hex_dst_string->len == src_str->len );
         TEST_ASSERT( memcmp( output, hex_dst_string->x,
                              hex_dst_string->len ) == 0 );
     }

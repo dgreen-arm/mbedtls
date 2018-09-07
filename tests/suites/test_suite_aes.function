@@ -25,6 +25,7 @@ void aes_encrypt_ecb( data_t *key_str, data_t *src_str,
         TEST_ASSERT( mbedtls_aes_crypt_ecb( &ctx, MBEDTLS_AES_ENCRYPT,
                                             src_str->x, output ) == 0 );
 
+        TEST_ASSERT( hex_dst_string->len == 16 );
         TEST_ASSERT( memcmp( output, hex_dst_string->x,
                              hex_dst_string->len ) == 0 );
     }
@@ -52,6 +53,7 @@ void aes_decrypt_ecb( data_t *key_str, data_t *src_str,
         TEST_ASSERT( mbedtls_aes_crypt_ecb( &ctx, MBEDTLS_AES_DECRYPT,
                                             src_str->x, output ) == 0 );
 
+        TEST_ASSERT( hex_dst_string->len == 16 );
         TEST_ASSERT( memcmp( output, hex_dst_string->x,
                              hex_dst_string->len ) == 0 );
     }
@@ -79,6 +81,7 @@ void aes_encrypt_cbc( data_t *key_str, data_t *iv_str,
                                         output ) == cbc_result );
     if( cbc_result == 0 )
     {
+        TEST_ASSERT( hex_dst_string->len == src_str->len );
         TEST_ASSERT( memcmp( output, hex_dst_string->x,
                              hex_dst_string->len ) == 0 );
     }
@@ -106,6 +109,7 @@ void aes_decrypt_cbc( data_t *key_str, data_t *iv_str,
                                         output ) == cbc_result );
     if( cbc_result == 0)
     {
+        TEST_ASSERT( hex_dst_string->len == src_str->len );
         TEST_ASSERT( memcmp( output, hex_dst_string->x,
                              hex_dst_string->len ) == 0 );
     }
@@ -259,6 +263,7 @@ void aes_encrypt_cfb128( data_t *key_str, data_t *iv_str,
                                            &iv_offset, iv_str->x, src_str->x,
                                            output ) == 0 );
 
+    TEST_ASSERT( hex_dst_string->len == 16 );
     TEST_ASSERT( memcmp( output, hex_dst_string->x,
                          hex_dst_string->len ) == 0 );
 
@@ -284,6 +289,7 @@ void aes_decrypt_cfb128( data_t *key_str, data_t *iv_str,
                                            &iv_offset, iv_str->x, src_str->x,
                                            output ) == 0 );
 
+    TEST_ASSERT( hex_dst_string->len == 16 );
     TEST_ASSERT( memcmp( output, hex_dst_string->x,
                          hex_dst_string->len ) == 0 );
 
@@ -308,6 +314,7 @@ void aes_encrypt_cfb8( data_t *key_str, data_t *iv_str,
                                          src_str->len, iv_str->x, src_str->x,
                                          output ) == 0 );
 
+    TEST_ASSERT( hex_dst_string->len == src_str->len );
     TEST_ASSERT( memcmp( output, hex_dst_string->x,
                          hex_dst_string->len ) == 0 );
 
@@ -332,6 +339,7 @@ void aes_decrypt_cfb8( data_t *key_str, data_t *iv_str,
                                          src_str->len, iv_str->x, src_str->x,
                                          output ) == 0 );
 
+    TEST_ASSERT( hex_dst_string->len == src_str->len );
     TEST_ASSERT( memcmp( output, hex_dst_string->x,
                          hex_dst_string->len ) == 0 );
 

@@ -95,6 +95,7 @@ void mbedtls_mpi_write_binary( int radix_X, char *input_X,
     TEST_ASSERT( mbedtls_mpi_write_binary( &X, buf, buflen ) == result );
     if( result == 0)
     {
+        TEST_ASSERT( input_A->len == buflen );
         TEST_ASSERT( memcmp( buf, input_A->x, input_A->len ) == 0 );
     }
 
@@ -128,7 +129,7 @@ void mbedtls_mpi_read_file( int radix_X, char *input_file,
         buflen = mbedtls_mpi_size( &X );
         TEST_ASSERT( mbedtls_mpi_write_binary( &X, buf, buflen ) == 0 );
 
-
+        TEST_ASSERT( input_A->len == buflen );
         TEST_ASSERT( memcmp( buf, input_A->x, input_A->len ) == 0 );
     }
 

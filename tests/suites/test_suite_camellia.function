@@ -25,6 +25,7 @@ void camellia_encrypt_ecb( data_t *key_str, data_t *src_str,
         TEST_ASSERT( mbedtls_camellia_crypt_ecb( &ctx,
                      MBEDTLS_CAMELLIA_ENCRYPT, src_str->x, output ) == 0 );
 
+        TEST_ASSERT( hex_dst_string->len == 16 );
         TEST_ASSERT( memcmp( output, hex_dst_string->x, hex_dst_string->len )
                      == 0 );
     }
@@ -52,6 +53,7 @@ void camellia_decrypt_ecb( data_t *key_str, data_t *src_str,
         TEST_ASSERT( mbedtls_camellia_crypt_ecb( &ctx,
                      MBEDTLS_CAMELLIA_DECRYPT, src_str->x, output ) == 0 );
 
+        TEST_ASSERT( hex_dst_string->len == 16 );
         TEST_ASSERT( memcmp( output, hex_dst_string->x, hex_dst_string->len )
                      == 0 );
     }
@@ -78,7 +80,7 @@ void camellia_encrypt_cbc( data_t *key_str, data_t *iv_str,
                  src_str->len, iv_str->x, src_str->x, output) == cbc_result );
     if( cbc_result == 0 )
     {
-
+        TEST_ASSERT( hex_dst_string->len == src_str->len );
         TEST_ASSERT( memcmp( output, hex_dst_string->x, hex_dst_string->len )
                      == 0 );
     }
@@ -105,7 +107,7 @@ void camellia_decrypt_cbc( data_t *key_str, data_t *iv_str,
                  src_str->len, iv_str->x, src_str->x, output ) == cbc_result );
     if( cbc_result == 0 )
     {
-
+        TEST_ASSERT( hex_dst_string->len == src_str->len );
         TEST_ASSERT( memcmp( output, hex_dst_string->x, hex_dst_string->len )
                      == 0 );
     }
@@ -132,6 +134,7 @@ void camellia_encrypt_cfb128( data_t *key_str, data_t *iv_str,
     TEST_ASSERT( mbedtls_camellia_crypt_cfb128( &ctx, MBEDTLS_CAMELLIA_ENCRYPT,
                  16, &iv_offset, iv_str->x, src_str->x, output ) == 0 );
 
+    TEST_ASSERT( hex_dst_string->len == 16 );
     TEST_ASSERT( memcmp( output, hex_dst_string->x, hex_dst_string->len )
                  == 0 );
 
@@ -157,6 +160,7 @@ void camellia_decrypt_cfb128( data_t *key_str, data_t *iv_str,
     TEST_ASSERT( mbedtls_camellia_crypt_cfb128( &ctx, MBEDTLS_CAMELLIA_DECRYPT,
                  16, &iv_offset, iv_str->x, src_str->x, output ) == 0 );
 
+    TEST_ASSERT( hex_dst_string->len == 16 );
     TEST_ASSERT( memcmp( output, hex_dst_string->x, hex_dst_string->len )
                  == 0 );
 

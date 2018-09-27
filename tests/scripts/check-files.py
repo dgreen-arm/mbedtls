@@ -145,6 +145,21 @@ class TodoIssueTracker(IssueTracker):
         return b"todo" in line.lower()
 
 
+class ConflictMarkerIssueTracker(IssueTracker):
+
+    def __init__(self):
+        super(ConflictMarkerIssueTracker, self).__init__()
+        self.heading = "Conflict markers:"
+        self.files_exemptions = [
+            ".md", "ChangeLog", "compat.sh", "ssl-opt.sh",
+            "basic-build-test.sh"
+        ]
+
+    def issue_with_line(self, line):
+        return any(marker in line for marker
+                   in [b">"*7, b"<"*7, b"="*7, b"|"*7])
+
+
 class IntegrityChecker(object):
 
     def __init__(self, log_file):
@@ -169,6 +184,7 @@ class IntegrityChecker(object):
             TrailingWhitespaceIssueTracker(),
             TabIssueTracker(),
             TodoIssueTracker(),
+            ConflictMarkerIssueTracker(),
         ]
 
     def check_repo_path(self):

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 This file is part of Mbed TLS (https://tls.mbed.org)
 
@@ -9,7 +9,7 @@ Purpose
 This script checks the current state of the source code for minor issues,
 including incorrect file permissions, presence of tabs, non-Unix line endings,
 trailing whitespace, presence of UTF-8 BOM, and TODO comments.
-Note: requires python 3, must be run from Mbed TLS root.
+Note: must be run from Mbed TLS root.
 """
 
 import os
@@ -65,7 +65,7 @@ class IssueTracker(object):
 class PermissionIssueTracker(IssueTracker):
 
     def __init__(self):
-        super().__init__()
+        super(PermissionIssueTracker, self).__init__()
         self.heading = "Incorrect permissions:"
 
     def check_file_for_issue(self, filepath):
@@ -77,7 +77,7 @@ class PermissionIssueTracker(IssueTracker):
 class EndOfFileNewlineIssueTracker(IssueTracker):
 
     def __init__(self):
-        super().__init__()
+        super(EndOfFileNewlineIssueTracker, self).__init__()
         self.heading = "Missing newline at end of file:"
 
     def check_file_for_issue(self, filepath):
@@ -89,7 +89,7 @@ class EndOfFileNewlineIssueTracker(IssueTracker):
 class Utf8BomIssueTracker(IssueTracker):
 
     def __init__(self):
-        super().__init__()
+        super(Utf8BomIssueTracker, self).__init__()
         self.heading = "UTF-8 BOM present:"
 
     def check_file_for_issue(self, filepath):
@@ -101,7 +101,7 @@ class Utf8BomIssueTracker(IssueTracker):
 class LineEndingIssueTracker(IssueTracker):
 
     def __init__(self):
-        super().__init__()
+        super(LineEndingIssueTracker, self).__init__()
         self.heading = "Non Unix line endings:"
 
     def issue_with_line(self, line):
@@ -111,7 +111,7 @@ class LineEndingIssueTracker(IssueTracker):
 class TrailingWhitespaceIssueTracker(IssueTracker):
 
     def __init__(self):
-        super().__init__()
+        super(TrailingWhitespaceIssueTracker, self).__init__()
         self.heading = "Trailing whitespace:"
         self.files_exemptions = [".md"]
 
@@ -122,7 +122,7 @@ class TrailingWhitespaceIssueTracker(IssueTracker):
 class TabIssueTracker(IssueTracker):
 
     def __init__(self):
-        super().__init__()
+        super(TabIssueTracker, self).__init__()
         self.heading = "Tabs present:"
         self.files_exemptions = [
             "Makefile", "generate_visualc_files.pl"
@@ -135,7 +135,7 @@ class TabIssueTracker(IssueTracker):
 class TodoIssueTracker(IssueTracker):
 
     def __init__(self):
-        super().__init__()
+        super(TodoIssueTracker, self).__init__()
         self.heading = "TODO present:"
         self.files_exemptions = [
             __file__, "benchmark.c", "pull_request_template.md"
@@ -212,7 +212,7 @@ def run_main():
             "minor issues, including incorrect file permissions, "
             "presence of tabs, non-Unix line endings, trailing whitespace, "
             "presence of UTF-8 BOM, and TODO comments. "
-            "Note: requires python 3, must be run from Mbed TLS root."
+            "Note: must be run from Mbed TLS root."
         )
     )
     parser.add_argument(

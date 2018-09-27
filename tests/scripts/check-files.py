@@ -155,6 +155,12 @@ class IntegrityChecker(object):
             ".c", ".h", ".sh", ".pl", ".py", ".md", ".function", ".data",
             "Makefile", "CMakeLists.txt", "ChangeLog"
         )
+        self.directory_exemptions = [
+            os.path.join("yotta", "module"),
+            os.sep + ".git" + os.sep,
+            os.sep + "cov-int" + os.sep,
+            os.sep + "mbedos" + os.sep
+        ]
         self.issues_to_check = [
             PermissionIssueTracker(),
             EndOfFileNewlineIssueTracker(),
@@ -183,7 +189,7 @@ class IntegrityChecker(object):
         for root, dirs, files in sorted(os.walk(".")):
             for filename in sorted(files):
                 filepath = os.path.join(root, filename)
-                if (os.path.join("yotta", "module") in filepath or
+                if (any(d in filepath for d in self.directory_exemptions) or
                         not filepath.endswith(self.files_to_check)):
                     continue
                 for issue_to_check in self.issues_to_check:

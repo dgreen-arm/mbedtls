@@ -27,14 +27,17 @@ import tempfile
 
 class AbiChecker(object):
 
-    def __init__(self, report_dir, old_rev, new_rev, keep_all_reports):
+    def __init__(self, report_dir, old_repo, old_rev, new_repo, new_rev,
+                 keep_all_reports):
         self.repo_path = "."
         self.log = None
         self.setup_logger()
         self.report_dir = os.path.abspath(report_dir)
         self.keep_all_reports = keep_all_reports
         self.should_keep_report_dir = os.path.isdir(self.report_dir)
+        self.old_repo = old_repo
         self.old_rev = old_rev
+        self.new_repo = new_repo
         self.new_rev = new_rev
         self.mbedtls_modules = ["libmbedcrypto", "libmbedtls", "libmbedx509"]
         self.old_dumps = {}
@@ -58,13 +61,33 @@ class AbiChecker(object):
             if not shutil.which(command):
                 raise Exception("{} not installed, aborting".format(command))
 
-    def get_clean_worktree_for_git_revision(self, git_rev):
-        self.log.info(
-            "Checking out git worktree for revision {}".format(git_rev)
-        )
+    def get_clean_worktree_for_git_revision(self, remote_repo, git_rev):
         git_worktree_path = tempfile.mkdtemp()
+        if remote_repo:
+            self.log.info(
+                "Checking out git worktree for revision {} from {}".format(
+                    git_rev, remote_repo
+                )
+            )
+            fetch_process = subprocess.Popen(
+                [self.git_command, "fetch", remote_repo, git_rev],
+                cwd=self.repo_path,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT
+            )
+            fetch_output, _ = fetch_process.communicate()
+            self.log.info(fetch_output.decode("utf-8"))
+            if fetch_process.returncode != 0:
+                raise Exception("Fetching revision failed, aborting")
+            worktree_rev = "FETCH_HEAD"
+        else:
+            self.log.info(
+                "Checking out git worktree for revision {}".format(git_rev)
+            )
+            worktree_rev = git_rev
         worktree_process = subprocess.Popen(
-            [self.git_command, "worktree", "add", "--detach", git_worktree_path, git_rev],
+            [self.git_command, "worktree", "add", "--detach",
+             git_worktree_path, worktree_rev],
             cwd=self.repo_path,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT
@@ -141,8 +164,10 @@ class AbiChecker(object):
         if worktree_process.returncode != 0:
             raise Exception("Worktree cleanup failed, aborting")
 
-    def get_abi_dump_for_ref(self, git_rev):
-        git_worktree_path = self.get_clean_worktree_for_git_revision(git_rev)
+    def get_abi_dump_for_ref(self, remote_repo, git_rev):
+        git_worktree_path = self.get_clean_worktree_for_git_revision(
+            remote_repo, git_rev
+        )
         self.update_git_submodules(git_worktree_path)
         self.build_shared_libraries(git_worktree_path)
         abi_dumps = self.get_abi_dumps_from_shared_libraries(
@@ -203,8 +228,8 @@ class AbiChecker(object):
     def check_for_abi_changes(self):
         self.check_repo_path()
         self.check_abi_tools_are_installed()
-        self.old_dumps = self.get_abi_dump_for_ref(self.old_rev)
-        self.new_dumps = self.get_abi_dump_for_ref(self.new_rev)
+        self.old_dumps = self.get_abi_dump_for_ref(self.old_repo, self.old_rev)
+        self.new_dumps = self.get_abi_dump_for_ref(self.new_repo, self.new_rev)
         return self.get_abi_compatibility_report()
 
 
@@ -231,17 +256,37 @@ def run_main():
             help="keep all reports, even if there are no compatibility issues",
         )
         parser.add_argument(
-            "-o", "--old-rev", type=str, help="revision for old version",
-            required=True
+            "-o", "--old-rev", type=str,
+            help=("revision for old version."
+                  "Can include repository before revision"),
+            required=True, nargs="+"
         )
         parser.add_argument(
-            "-n", "--new-rev", type=str, help="revision for new version",
-            required=True
+            "-n", "--new-rev", type=str,
+            help=("revision for new version"
+                  "Can include repository before revision"),
+            required=True, nargs="+"
         )
         abi_args = parser.parse_args()
+        if len(abi_args.old_rev) == 1:
+            old_repo = None
+            old_rev = abi_args.old_rev[0]
+        elif len(abi_args.old_rev) == 2:
+            old_repo = abi_args.old_rev[0]
+            old_rev = abi_args.old_rev[1]
+        else:
+            raise Exception("Too many arguments passed for old version")
+        if len(abi_args.new_rev) == 1:
+            new_repo = None
+            new_rev = abi_args.new_rev[0]
+        elif len(abi_args.new_rev) == 2:
+            new_repo = abi_args.new_rev[0]
+            new_rev = abi_args.new_rev[1]
+        else:
+            raise Exception("Too many arguments passed for new version")
         abi_check = AbiChecker(
-            abi_args.report_dir, abi_args.old_rev,
-            abi_args.new_rev, abi_args.keep_all_reports
+            abi_args.report_dir, old_repo, old_rev,
+            new_repo, new_rev, abi_args.keep_all_reports
         )
         return_code = abi_check.check_for_abi_changes()
         sys.exit(return_code)

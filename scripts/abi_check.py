@@ -28,7 +28,7 @@ import tempfile
 class AbiChecker(object):
 
     def __init__(self, report_dir, old_repo, old_rev, new_repo, new_rev,
-                 keep_all_reports):
+                 keep_all_reports, skip_file=None):
         self.repo_path = "."
         self.log = None
         self.setup_logger()
@@ -39,6 +39,7 @@ class AbiChecker(object):
         self.old_rev = old_rev
         self.new_repo = new_repo
         self.new_rev = new_rev
+        self.skip_file = skip_file
         self.mbedtls_modules = ["libmbedcrypto", "libmbedtls", "libmbedx509"]
         self.old_dumps = {}
         self.new_dumps = {}
@@ -193,6 +194,9 @@ class AbiChecker(object):
                 "-strict",
                 "-report-path", output_path
             ]
+            if self.skip_file:
+                abi_compliance_command += ["-skip-symbols", self.skip_file,
+                                           "-skip-types", self.skip_file]
             abi_compliance_process = subprocess.Popen(
                 abi_compliance_command,
                 stdout=subprocess.PIPE,
@@ -267,6 +271,10 @@ def run_main():
                   "Can include repository before revision"),
             required=True, nargs="+"
         )
+        parser.add_argument(
+            "-s", "--skip-file", type=str,
+            help="path to file containing symbols and types to skip"
+        )
         abi_args = parser.parse_args()
         if len(abi_args.old_rev) == 1:
             old_repo = None
@@ -286,7 +294,8 @@ def run_main():
             raise Exception("Too many arguments passed for new version")
         abi_check = AbiChecker(
             abi_args.report_dir, old_repo, old_rev,
-            new_repo, new_rev, abi_args.keep_all_reports
+            new_repo, new_rev, abi_args.keep_all_reports,
+            abi_args.skip_file
         )
         return_code = abi_check.check_for_abi_changes()
         sys.exit(return_code)

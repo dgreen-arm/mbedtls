@@ -43,10 +43,11 @@ class RepoVersion(object):
 
 class AbiChecker(object):
 
-    def __init__(self, old_version, new_version, report_dir,
+    def __init__(self, verbose, old_version, new_version, report_dir,
                  keep_all_reports, brief, skip_file=None):
         self.repo_path = "."
         self.log = None
+        self.verbose = verbose
         self._setup_logger()
         self.report_dir = os.path.abspath(report_dir)
         self.keep_all_reports = keep_all_reports
@@ -67,7 +68,10 @@ class AbiChecker(object):
 
     def _setup_logger(self):
         self.log = logging.getLogger()
-        self.log.setLevel(logging.INFO)
+        if self.verbose:
+            self.log.setLevel(logging.DEBUG)
+        else:
+            self.log.setLevel(logging.INFO)
         self.log.addHandler(logging.StreamHandler())
 
     def _check_abi_tools_are_installed(self):
@@ -78,7 +82,7 @@ class AbiChecker(object):
     def _get_clean_worktree_for_git_revision(self, version):
         git_worktree_path = tempfile.mkdtemp()
         if version.repository:
-            self.log.info(
+            self.log.debug(
                 "Checking out git worktree for revision {} from {}".format(
                     version.revision, version.repository
                 )
@@ -91,12 +95,12 @@ class AbiChecker(object):
                 stderr=subprocess.STDOUT
             )
             fetch_output, _ = fetch_process.communicate()
-            self.log.info(fetch_output.decode("utf-8"))
+            self.log.debug(fetch_output.decode("utf-8"))
             if fetch_process.returncode != 0:
                 raise Exception("Fetching revision failed, aborting")
             worktree_rev = "FETCH_HEAD"
         else:
-            self.log.info("Checking out git worktree for revision {}".format(
+            self.log.debug("Checking out git worktree for revision {}".format(
                 version.revision
             ))
             worktree_rev = version.revision
@@ -108,7 +112,7 @@ class AbiChecker(object):
             stderr=subprocess.STDOUT
         )
         worktree_output, _ = worktree_process.communicate()
-        self.log.info(worktree_output.decode("utf-8"))
+        self.log.debug(worktree_output.decode("utf-8"))
         if worktree_process.returncode != 0:
             raise Exception("Checking out worktree failed, aborting")
         return git_worktree_path
@@ -121,7 +125,7 @@ class AbiChecker(object):
             stderr=subprocess.STDOUT
         )
         output, _ = process.communicate()
-        self.log.info(output.decode("utf-8"))
+        self.log.debug(output.decode("utf-8"))
         if process.returncode != 0:
             raise Exception("git submodule update failed, aborting")
         if not (os.path.exists(os.path.join(git_worktree_path, "crypto"))
@@ -137,7 +141,7 @@ class AbiChecker(object):
                 stderr=subprocess.STDOUT
             )
             fetch_output, _ = fetch_process.communicate()
-            self.log.info(fetch_output.decode("utf-8"))
+            self.log.debug(fetch_output.decode("utf-8"))
             if fetch_process.returncode != 0:
                 raise Exception("git fetch failed, aborting")
             crypto_rev = "FETCH_HEAD"
@@ -151,7 +155,7 @@ class AbiChecker(object):
             stderr=subprocess.STDOUT
         )
         checkout_output, _ = checkout_process.communicate()
-        self.log.info(checkout_output.decode("utf-8"))
+        self.log.debug(checkout_output.decode("utf-8"))
         if checkout_process.returncode != 0:
             raise Exception("git checkout failed, aborting")
 
@@ -168,7 +172,7 @@ class AbiChecker(object):
             stderr=subprocess.STDOUT
         )
         make_output, _ = make_process.communicate()
-        self.log.info(make_output.decode("utf-8"))
+        self.log.debug(make_output.decode("utf-8"))
         for root, dirs, files in os.walk(git_worktree_path):
             for file in fnmatch.filter(files, "*.so"):
                 version.modules[os.path.splitext(file)[0]] = (
@@ -197,7 +201,7 @@ class AbiChecker(object):
                 stderr=subprocess.STDOUT
             )
             abi_dump_output, _ = abi_dump_process.communicate()
-            self.log.info(abi_dump_output.decode("utf-8"))
+            self.log.debug(abi_dump_output.decode("utf-8"))
             if abi_dump_process.returncode != 0:
                 raise Exception("abi-dumper failed, aborting")
             version.abi_dumps[mbed_module] = output_path
@@ -211,7 +215,7 @@ class AbiChecker(object):
             stderr=subprocess.STDOUT
         )
         worktree_output, _ = worktree_process.communicate()
-        self.log.info(worktree_output.decode("utf-8"))
+        self.log.debug(worktree_output.decode("utf-8"))
         if worktree_process.returncode != 0:
             raise Exception("Worktree cleanup failed, aborting")
 
@@ -329,6 +333,10 @@ def run_main():
             )
         )
         parser.add_argument(
+            "-v", "--verbose", action="store_true",
+            help="set verbosity level",
+        )
+        parser.add_argument(
             "-r", "--report-dir", type=str, default="reports",
             help="directory where reports are stored, default is reports",
         )
@@ -380,7 +388,7 @@ def run_main():
         new_version = RepoVersion("new", abi_args.new_repo, abi_args.new_rev,
                  abi_args.new_crypto_repo, abi_args.new_crypto_rev)
         abi_check = AbiChecker(
-            old_version, new_version, abi_args.report_dir,
+            abi_args.verbose, old_version, new_version, abi_args.report_dir,
             abi_args.keep_all_reports, abi_args.brief, abi_args.skip_file
         )
         return_code = abi_check.check_for_abi_changes()

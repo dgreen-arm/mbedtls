@@ -7949,7 +7949,11 @@ run_test    "export keys functionality" \
             -s "exported ivlen is "  \
             -c "exported maclen is " \
             -c "exported keylen is " \
-            -c "exported ivlen is "
+            -c "exported ivlen is " \
+            -c "EAP-TLS key material is: "\
+            -s "EAP-TLS key material is: "\
+            -c "EAP-TLS IV is: " \
+            -s "EAP-TLS IV is: "
 
 # Final report
 

@@ -367,16 +367,20 @@ fail() {
     fi
     echo "  ! outputs saved to o-XXX-${TESTS}.log"
 
-    if [ "X${USER:-}" = Xbuildbot -o "X${LOGNAME:-}" = Xbuildbot -o "${LOG_FAILURE_ON_STDOUT:-0}" != 0 ]; then
-        echo "  ! server output:"
-        cat o-srv-${TESTS}.log
-        echo "  ! ========================================================"
-        echo "  ! client output:"
-        cat o-cli-${TESTS}.log
-        if [ -n "$PXY_CMD" ]; then
+    if [ "${SHORT_LOG_FAILURE_ON_STDOUT:-0}" != 0 -o "${LOG_FAILURE_ON_STDOUT:-0}" != 0 ]; then
+        if [ `du -c o-*-${TESTS}.log | grep total | awk '{print \$1;}'` -le 1024 -o "${LOG_FAILURE_ON_STDOUT:-0}" != 0 ]; then
+            echo "  ! server output:"
+            cat o-srv-${TESTS}.log
             echo "  ! ========================================================"
-            echo "  ! proxy output:"
-            cat o-pxy-${TESTS}.log
+            echo "  ! client output:"
+            cat o-cli-${TESTS}.log
+            if [ -n "$PXY_CMD" ]; then
+                echo "  ! ========================================================"
+                echo "  ! proxy output:"
+                cat o-pxy-${TESTS}.log
+            fi
+        else
+            echo "  ! Logs exceed 1MiB, skipping"
         fi
         echo ""
     fi

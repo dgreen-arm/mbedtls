@@ -1216,12 +1216,16 @@ run_client() {
             cp $CLI_OUT c-cli-${TESTS}.log
             echo "  ! outputs saved to c-srv-${TESTS}.log, c-cli-${TESTS}.log"
 
-            if [ "X${USER:-}" = Xbuildbot -o "X${LOGNAME:-}" = Xbuildbot -o "${LOG_FAILURE_ON_STDOUT:-0}" != 0 ]; then
-                echo "  ! server output:"
-                cat c-srv-${TESTS}.log
-                echo "  ! ==================================================="
-                echo "  ! client output:"
-                cat c-cli-${TESTS}.log
+            if [ "${SHORT_LOG_FAILURE_ON_STDOUT:-0}" != 0 -o "${LOG_FAILURE_ON_STDOUT:-0}" != 0 ]; then
+                if [ `du -c c-*-${TESTS}.log | grep total | awk '{print \$1;}'` -le 1024 -o "${LOG_FAILURE_ON_STDOUT:-0}" != 0 ]; then
+                    echo "  ! server output:"
+                    cat c-srv-${TESTS}.log
+                    echo "  ! ==================================================="
+                    echo "  ! client output:"
+                    cat c-cli-${TESTS}.log
+                else
+                    echo "  ! Logs exceed 1MiB, skipping"
+                fi
             fi
 
             FAILED=$(( $FAILED + 1 ))

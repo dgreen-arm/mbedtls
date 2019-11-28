@@ -3489,6 +3489,13 @@
 //#define MBEDTLS_SSL_COOKIE_TIMEOUT        60 /**< Default expiration delay of DTLS cookies, in seconds if HAVE_TIME, or in number of cookies issued */
 
 /**
+ * \def MBEDTLS_SSL_VARIABLE_BUFFER_LENGTH
+ *
+ * Enable modifying the maximum I/O buffer size.
+ */
+//#define MBEDTLS_SSL_VARIABLE_BUFFER_LENGTH
+
+/**
  * Complete list of ciphersuites to use, in order of preference.
  *
  * \warning No dependency checking is done on that field! This option can only

@@ -1771,6 +1771,13 @@
 #define MBEDTLS_SSL_TRUNCATED_HMAC
 
 /**
+ * \def MBEDTLS_SSL_VARIABLE_BUFFER_LENGTH
+ *
+ * Enable modifying the maximum I/O buffer size.
+ */
+//#define MBEDTLS_SSL_VARIABLE_BUFFER_LENGTH
+
+/**
  * \def MBEDTLS_SSL_TRUNCATED_HMAC_COMPAT
  *
  * Fallback to old (pre-2.7), non-conforming implementation of the truncated
@@ -3487,13 +3494,6 @@
 //#define MBEDTLS_SSL_DEFAULT_TICKET_LIFETIME     86400 /**< Lifetime of session tickets (if enabled) */
 //#define MBEDTLS_PSK_MAX_LEN               32 /**< Max size of TLS pre-shared keys, in bytes (default 256 bits) */
 //#define MBEDTLS_SSL_COOKIE_TIMEOUT        60 /**< Default expiration delay of DTLS cookies, in seconds if HAVE_TIME, or in number of cookies issued */
-
-/**
- * \def MBEDTLS_SSL_VARIABLE_BUFFER_LENGTH
- *
- * Enable modifying the maximum I/O buffer size.
- */
-//#define MBEDTLS_SSL_VARIABLE_BUFFER_LENGTH
 
 /**
  * Complete list of ciphersuites to use, in order of preference.

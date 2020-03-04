@@ -328,6 +328,7 @@ static int x509_write_time( unsigned char **p, unsigned char *start,
     return( (int) len );
 }
 
+#if (MBEDTLS_PK_SIGNATURE_MAX_SIZE > 0)
 int mbedtls_x509write_crt_der( mbedtls_x509write_cert *ctx,
                                unsigned char *buf, size_t size,
                                int (*f_rng)(void *, unsigned char *, size_t),
@@ -517,6 +518,7 @@ int mbedtls_x509write_crt_der( mbedtls_x509write_cert *ctx,
 
     return( (int) len );
 }
+#endif
 
 #define PEM_BEGIN_CRT           "-----BEGIN CERTIFICATE-----\n"
 #define PEM_END_CRT             "-----END CERTIFICATE-----\n"
